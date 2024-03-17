@@ -8,8 +8,8 @@ public:
 
 private:
     int LinkeID;
-    int inNode;
-    int outNode;
+    int fromNode;
+    int toNode;
     double weight;
     bool enabled;
 };

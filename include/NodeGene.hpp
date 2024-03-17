@@ -3,14 +3,22 @@
 
 #include "ActivationRelu.hpp"
 
+enum NodeType{
+    INPUT,
+    HIDDEN,
+    OUTPUT
+};
+
 class NodeGene{
 public:
     NodeGene(int id, double bias);
     int getID();
-    double getBias();
-    void setBias(double bias);
+    float getOutput();
+    
 private:
+    float output;
     int id;
+    NodeType type;
     double bias;
     ActivationRelu activation;
 };
