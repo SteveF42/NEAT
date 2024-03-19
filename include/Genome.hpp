@@ -3,49 +3,41 @@
 #include <iostream>
 #include <vector>
 #include "NodeGene.hpp"
-#include <map>
-
-struct LinkID
-{
-    int inNode;
-    int outNode;
-};
-
-struct LinkGene
-{
-    LinkID id;
-    double weight;
-    bool enabled;
-};
+#include "LinkGene.hpp"
+using std::vector;
 
 class Genome
 {
 public:
-    Genome(int genomeID, int inputs, int outputs);
+    Genome(int inputs, int outputs);
     Genome crossGenomes(const Genome &rhs);
     void mutate();
     void activate();
 
-private:
-    int genomeID;
-    float fitness;
-    int inputs;
-    int outputs;
-    std::vector<NodeGene> nodes;
-    std::vector<LinkGene> links;
-    
-    LinkGene crossLinks(const LinkGene &rhs);
-    NodeGene crossNeurons(const NodeGene &rhs);
+    vector<LinkGene> getLinks();
+    vector<NodeGene> getNodes();
 
     // mutations
     void addNode();
-    void removeNode(int nodeID);
+    void removeNode();
     void addLink();
     void removeLink();
     bool isDominant(const Genome &rhs);
+private:
+    float fitness;
+    int inputs;
+    int outputs;
+    //first n + m nodes are inputs and outputs
+    vector<NodeGene> nodes;
+    vector<LinkGene> links;
+    
 
-    NodeGene crossNeurons(const NodeGene &rhs);
-    LinkGene crossLinks(const LinkGene &rhs);
+    NodeGene crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
+    LinkGene crossLinks(const LinkGene &lhs, const LinkGene &rhs);
+
+    //util
+    bool containsCycle(int fromNode);
+    bool cycleUtil(int v, bool visited[], bool *rs);
 };
 
 #endif

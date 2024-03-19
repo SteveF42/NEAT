@@ -1,15 +1,23 @@
 #ifndef LinkGene_HPP
 #define LinkGene_HPP
+#include "NodeGene.hpp"
+
+class NodeGene;
 
 class LinkGene
 {
 public:
-    LinkGene(int inNode, int outNode, double weight);
-
+    LinkGene(NodeGene* inNode, NodeGene* outNode, double weight);
+    void setEnabled(bool enabled);
+    double getWeight() const;
+    bool isEnabled() const;
+    NodeGene* getToNode() const;
+    NodeGene* getFromNode() const;
+    
 private:
     int LinkeID;
-    int fromNode;
-    int toNode;
+    NodeGene* toNode;
+    NodeGene* fromNode;
     double weight;
     bool enabled;
 };
