@@ -1,4 +1,4 @@
-#include "LinkGene.hpp"
+#include "Linkgene.hpp"
 
 LinkGene::LinkGene(NodeGene* toNode, NodeGene* fromNode, double weight)
 {

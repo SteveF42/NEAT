@@ -14,8 +14,8 @@ public:
     void mutate();
     void activate();
 
-    vector<LinkGene> getLinks();
-    vector<NodeGene> getNodes();
+    vector<LinkGene*> getLinks();
+    vector<NodeGene*> getNodes();
 
     // mutations
     void addNode();
@@ -28,8 +28,8 @@ private:
     int inputs;
     int outputs;
     //first n + m nodes are inputs and outputs
-    vector<NodeGene> nodes;
-    vector<LinkGene> links;
+    vector<NodeGene*> nodes;
+    vector<LinkGene*> links;
     
 
     NodeGene crossNeurons(const NodeGene &lhs, const NodeGene &rhs);

@@ -7,7 +7,7 @@ class NodeGene;
 class LinkGene
 {
 public:
-    LinkGene(NodeGene* inNode, NodeGene* outNode, double weight);
+    LinkGene(NodeGene* toNode, NodeGene* fromNode, double weight);
     void setEnabled(bool enabled);
     double getWeight() const;
     bool isEnabled() const;

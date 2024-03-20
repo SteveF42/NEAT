@@ -11,11 +11,11 @@ Genome::Genome(int inputs, int outputs)
     // initialize inputs and outputs
     for (int i = 0; i < inputs; i++)
     {
-        nodes.push_back(NodeGene(i, 0, INPUT));
+        nodes.push_back(new NodeGene(i, 0, INPUT));
     }
     for (int i = 0; i < outputs; i++)
     {
-        nodes.push_back(NodeGene(i + inputs, 0, OUTPUT));
+        nodes.push_back(new NodeGene(i + inputs, 0, OUTPUT));
     }
 
     // initialize links
@@ -23,7 +23,7 @@ Genome::Genome(int inputs, int outputs)
     {
         for (int j = 0; j < outputs; j++)
         {
-            links.push_back(LinkGene(&nodes[i], &nodes[j + inputs], 1));
+            links.push_back(new LinkGene(nodes[j + inputs], nodes[i], 1));
         }
     }
 }
@@ -35,12 +35,12 @@ Genome Genome::crossGenomes(const Genome &rhs)
     return child;
 }
 
-vector<LinkGene> Genome::getLinks()
+vector<LinkGene*> Genome::getLinks()
 {
     return links;
 }
 
-vector<NodeGene> Genome::getNodes()
+vector<NodeGene*> Genome::getNodes()
 {
     return nodes;
 }
@@ -71,21 +71,30 @@ void Genome::addNode()
 {
     // get a random link
     int linkIndex = rand() % (links.size() - 1);
-    LinkGene link = links[linkIndex];
+    LinkGene *link = links[linkIndex];
     // disable the link
-    link.setEnabled(false);
+    link->setEnabled(false);
     // create a new node
-    int idx = std::min(link.getToNode()->getID(), (int)(nodes.size() - outputs));
-    NodeGene newNode(nodes.size(), 1, HIDDEN);
+    int nodeIdx = 0;
+    for(int i = 0; i < nodes.size(); i++)
+    {
+        if(link->getToNode()->getID() == nodes[i]->getID())
+        {
+            nodeIdx = i;
+            break;
+        }
+    }
+    int idx = std::min(nodeIdx, (int)(nodes.size() - outputs));
+    NodeGene *newNode = new NodeGene(nodes.size(), 1, HIDDEN);
     // create two new links
-    LinkGene fromLink(link.getFromNode(), &newNode, 1);
-    LinkGene toLink(&newNode, link.getToNode(), link.getWeight());
+    LinkGene *fromLink = new LinkGene(newNode, link->getFromNode(), 1);
+    LinkGene *toLink = new LinkGene(link->getToNode(), newNode, link->getWeight());
     links.push_back(fromLink);
     links.push_back(toLink);
     // add the new node
     nodes.insert(nodes.begin() + idx, newNode);
-    newNode.addToLink(toLink);
-    link.getFromNode()->addToLink(fromLink);
+    newNode->addToLink(*fromLink);
+    link->getFromNode()->addToLink(*toLink);
 }
 
 void Genome::removeNode()
@@ -98,21 +107,21 @@ void Genome::removeNode()
 
     // node index can only be hidden
     int nodeIndex = rand() % (nodes.size() - outputs - inputs);
-    nodeIndex += inputs + 1;
+    nodeIndex += inputs;
 
-    NodeGene &nodeToDelete = nodes[nodeIndex];
+    NodeGene *nodeToDelete = nodes[nodeIndex];
 
     // remove all links to and from the node
     for (auto it = links.begin(); it != links.end();)
     {
-        if (it->getFromNode()->getID() == nodeToDelete.getID())
+        if ((*it)->getFromNode() == nodeToDelete)
         {
             it = links.erase(it);
         }
-        else if (it->getToNode()->getID() == nodeToDelete.getID())
+        else if ((*it)->getToNode() == nodeToDelete)
         {
             it = links.erase(it);
-            it->getFromNode()->removeLink(*it);
+            (*it)->getFromNode()->removeLink(**it);
         }
         else
         {
@@ -127,34 +136,29 @@ void Genome::removeNode()
 void Genome::addLink()
 {
     // from node can be inputs or hidden. to nodes can be hidden or outputs
-    if (nodes.size() <= inputs + outputs)
-    {
-        return;
-    }
-
     int fromNodeIndex = rand() % (nodes.size() - outputs);
     int toNodeIndex = (rand() % outputs) + inputs;
 
-    NodeGene &fromNode = nodes[fromNodeIndex];
-    NodeGene &toNode = nodes[toNodeIndex];
+    NodeGene *fromNode = nodes[fromNodeIndex];
+    NodeGene *toNode = nodes[toNodeIndex];
     // check if the link already exists
-    for (LinkGene link : links)
+    for (LinkGene* link : links)
     {
-        if (link.getFromNode()->getID() == fromNode.getID() && link.getToNode()->getID() == toNode.getID())
+        if (link->getFromNode()->getID() == fromNode->getID() && link->getToNode()->getID() == toNode->getID())
         {
-            link.setEnabled(true);
+            link->setEnabled(true);
             return;
         }
     }
 
-    if (containsCycle(fromNode.getID()))
+    if (containsCycle(fromNode->getID()))
     {
         return;
     }
 
     // create the link
-    LinkGene newLink(&fromNode, &toNode, 1);
-    fromNode.addToLink(newLink);
+    LinkGene *newLink = new LinkGene(toNode, fromNode, 1);
+    fromNode->addToLink(*newLink);
     links.push_back(newLink);
 }
 
@@ -166,8 +170,8 @@ void Genome::removeLink()
         return;
     }
     int linkIndex = rand() % links.size();
-    LinkGene &link = links[linkIndex];
-    link.getFromNode()->removeLink(link);
+    LinkGene *link = links[linkIndex];
+    link->getFromNode()->removeLink(*link);
     links.erase(links.begin() + linkIndex);
 }
 
@@ -191,7 +195,7 @@ bool Genome::containsCycle(int fromNode)
 {
     std::stack<NodeGene *> dfs;
     std::unordered_set<NodeGene *> visited;
-    dfs.push(&nodes[0]);
+    dfs.push(nodes[0]);
 
     while (dfs.size() > 0)
     {
