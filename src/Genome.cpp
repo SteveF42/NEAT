@@ -1,4 +1,5 @@
 #include "Genome.hpp"
+#include "Util.hpp"
 #include "random"
 #include <stack>
 #include <unordered_set>
@@ -35,12 +36,12 @@ Genome Genome::crossGenomes(const Genome &rhs)
     return child;
 }
 
-vector<LinkGene*> Genome::getLinks()
+vector<LinkGene *> Genome::getLinks()
 {
     return links;
 }
 
-vector<NodeGene*> Genome::getNodes()
+vector<NodeGene *> Genome::getNodes()
 {
     return nodes;
 }
@@ -48,7 +49,7 @@ vector<NodeGene*> Genome::getNodes()
 void Genome::mutate()
 {
     // mutate 50% of the time
-    int mutation = rand() % 4;
+    int mutation = randNumber(4);
     if (mutation == 0)
     {
         addNode();
@@ -70,15 +71,15 @@ void Genome::mutate()
 void Genome::addNode()
 {
     // get a random link
-    int linkIndex = rand() % (links.size() - 1);
+    int linkIndex = randNumber(links.size() - 1);
     LinkGene *link = links[linkIndex];
     // disable the link
     link->setEnabled(false);
     // create a new node
     int nodeIdx = 0;
-    for(int i = 0; i < nodes.size(); i++)
+    for (int i = 0; i < nodes.size(); i++)
     {
-        if(link->getToNode()->getID() == nodes[i]->getID())
+        if (link->getToNode()->getID() == nodes[i]->getID())
         {
             nodeIdx = i;
             break;
@@ -106,7 +107,7 @@ void Genome::removeNode()
     }
 
     // node index can only be hidden
-    int nodeIndex = rand() % (nodes.size() - outputs - inputs);
+    int nodeIndex = randNumber(nodes.size() - outputs - inputs);
     nodeIndex += inputs;
 
     NodeGene *nodeToDelete = nodes[nodeIndex];
@@ -129,20 +130,19 @@ void Genome::removeNode()
         }
     }
     // remove the node
-    std::cout << "Link Size: " << links.size() << "\n";
     nodes.erase(nodes.begin() + nodeIndex);
 }
 
 void Genome::addLink()
 {
     // from node can be inputs or hidden. to nodes can be hidden or outputs
-    int fromNodeIndex = rand() % (nodes.size() - outputs);
-    int toNodeIndex = (rand() % outputs) + inputs;
+    int fromNodeIndex = randNumber(nodes.size() - outputs);
+    int toNodeIndex = randNumber(outputs) + inputs;
 
     NodeGene *fromNode = nodes[fromNodeIndex];
     NodeGene *toNode = nodes[toNodeIndex];
     // check if the link already exists
-    for (LinkGene* link : links)
+    for (LinkGene *link : links)
     {
         if (link->getFromNode()->getID() == fromNode->getID() && link->getToNode()->getID() == toNode->getID())
         {
@@ -169,7 +169,7 @@ void Genome::removeLink()
     {
         return;
     }
-    int linkIndex = rand() % links.size();
+    int linkIndex = randNumber(links.size());
     LinkGene *link = links[linkIndex];
     link->getFromNode()->removeLink(*link);
     links.erase(links.begin() + linkIndex);
@@ -178,14 +178,14 @@ void Genome::removeLink()
 NodeGene Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
 {
     int id = lhs.getID();
-    double bias = rand() % 2 == 0 ? lhs.getBias() : rhs.getBias();
+    double bias = randNumber(2) == 0 ? lhs.getBias() : rhs.getBias();
     return NodeGene(id, bias, lhs.getType());
 }
 
 LinkGene Genome::crossLinks(const LinkGene &lhs, const LinkGene &rhs)
 {
-    double weight = rand() % 2 == 0 ? lhs.getWeight() : rhs.getWeight();
-    bool enabled = rand() % 2 == 0 ? lhs.isEnabled() : rhs.isEnabled();
+    double weight = randNumber(2) == 0 ? lhs.getWeight() : rhs.getWeight();
+    bool enabled = randNumber(2) == 0 ? lhs.isEnabled() : rhs.isEnabled();
     LinkGene child(lhs.getFromNode(), lhs.getToNode(), weight);
     child.setEnabled(enabled);
     return child;

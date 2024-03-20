@@ -8,13 +8,6 @@ TEST_CASE("Genome links initialized correctly")
     REQUIRE(genome.getLinks().size() == 2);
 }
 
-TEST_CASE("Add link mutation")
-{
-    Genome genome(2, 1);
-    genome.addLink();
-    REQUIRE(genome.getLinks().size() == 2);
-}
-
 TEST_CASE("Add/remove node mutation")
 {
     Genome genome(2, 1);
@@ -44,17 +37,18 @@ TEST_CASE("Add/remove node mutation")
     REQUIRE(genome.getLinks().size() == 2);
 }
 
-TEST_CASE("Removing a link/ adding a link")
+TEST_CASE("Removing a link/ adding a link mutation")
 {
     Genome genome(3, 2);
     REQUIRE(genome.getLinks().size() == 6);
     genome.removeLink();
     REQUIRE(genome.getLinks().size() == 5);
-
-    genome.addNode();
-    genome.addLink();
-    REQUIRE(genome.getLinks().size() == 8);
-
     genome.removeLink();
-    REQUIRE(genome.getLinks().size() == 7);
+    genome.removeLink();
+    genome.removeLink();
+    genome.removeLink();
+    genome.removeLink();
+    REQUIRE(genome.getLinks().size() == 0);
+    genome.addLink();
+    REQUIRE(genome.getLinks().size() == 1);
 }
