@@ -16,6 +16,7 @@ public:
     
 private:
     int LinkeID;
+    inline static int nextID = 0;
     NodeGene* toNode;
     NodeGene* fromNode;
     double weight;

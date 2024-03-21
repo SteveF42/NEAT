@@ -52,3 +52,32 @@ TEST_CASE("Removing a link/ adding a link mutation")
     genome.addLink();
     REQUIRE(genome.getLinks().size() == 1);
 }
+
+TEST_CASE("Genome activation")
+{
+    Genome genome1(3, 2);
+    Genome genome2(5, 2);
+    Genome genome3(9, 4);
+
+    vector<double> inputs1 = {1, 2, 3};
+    vector<double> inputs2 = {1, 2, 3, 4, 5};
+    vector<double> inputs3 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+
+    auto outputs1 = genome1.activate(inputs1);
+    auto outputs2 = genome2.activate(inputs2);
+    auto outputs3 = genome3.activate(inputs3);
+
+    REQUIRE(outputs1.size() == 2);
+    REQUIRE(outputs2.size() == 2);
+    REQUIRE(outputs3.size() == 4);
+
+    try
+    {
+        auto outputs4 = genome1.activate(inputs2);
+        REQUIRE(false);
+    }
+    catch (const std::exception &e)
+    {
+        REQUIRE(true);
+    }
+}

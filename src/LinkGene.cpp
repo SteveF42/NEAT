@@ -2,6 +2,7 @@
 
 LinkGene::LinkGene(NodeGene* toNode, NodeGene* fromNode, double weight)
 {
+    this->LinkeID = nextID++;
     this->fromNode = fromNode;
     this->toNode = toNode;
     this->weight = weight;

@@ -12,11 +12,11 @@ Genome::Genome(int inputs, int outputs)
     // initialize inputs and outputs
     for (int i = 0; i < inputs; i++)
     {
-        nodes.push_back(new NodeGene(i, 0, INPUT));
+        nodes.push_back(new NodeGene(1, INPUT));
     }
     for (int i = 0; i < outputs; i++)
     {
-        nodes.push_back(new NodeGene(i + inputs, 0, OUTPUT));
+        nodes.push_back(new NodeGene(0, OUTPUT));
     }
 
     // initialize links
@@ -34,6 +34,49 @@ Genome Genome::crossGenomes(const Genome &rhs)
     Genome child(inputs, outputs);
 
     return child;
+}
+
+vector<float> Genome::activate(vector<double> inputs)
+{
+    vector<float> genomeOutputs;
+    int outIdx = 0;
+    if (inputs.size() != this->inputs)
+    {
+        throw std::runtime_error("Invalid input size " + std::to_string(inputs.size()) + " expected " + std::to_string(this->inputs));
+    }
+
+    // idk I saw other people do this
+    for (auto node : nodes)
+    {
+        node->resetAccumalator();
+    }
+
+    for (int i = 0; i < this->nodes.size(); i++)
+    {
+        NodeGene *node = this->nodes[i];
+        if (this->nodes[i]->getType() == INPUT)
+        {
+            // set activation to input
+            node->output = inputs[i];
+        }
+        else if(node->getType() == HIDDEN)
+        {
+            // activate the node
+            node->activate();
+        }
+
+        for (auto link : node->getToLinks())
+        {
+            NodeGene *toNode = link->getToNode();
+            toNode->addAccumalator(link->getWeight() * node->output);
+        }
+        
+        if(node->getType() == OUTPUT)
+        {
+            genomeOutputs.push_back(node->activate());
+        }
+    }
+    return genomeOutputs;
 }
 
 vector<LinkGene *> Genome::getLinks()
@@ -86,7 +129,7 @@ void Genome::addNode()
         }
     }
     int idx = std::min(nodeIdx, (int)(nodes.size() - outputs));
-    NodeGene *newNode = new NodeGene(nodes.size(), 1, HIDDEN);
+    NodeGene *newNode = new NodeGene(1, HIDDEN);
     // create two new links
     LinkGene *fromLink = new LinkGene(newNode, link->getFromNode(), 1);
     LinkGene *toLink = new LinkGene(link->getToNode(), newNode, link->getWeight());
@@ -179,7 +222,7 @@ NodeGene Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
 {
     int id = lhs.getID();
     double bias = randNumber(2) == 0 ? lhs.getBias() : rhs.getBias();
-    return NodeGene(id, bias, lhs.getType());
+    return NodeGene(bias, lhs.getType());
 }
 
 LinkGene Genome::crossLinks(const LinkGene &lhs, const LinkGene &rhs)

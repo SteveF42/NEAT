@@ -1,8 +1,8 @@
 #include "NodeGene.hpp"
 
-NodeGene::NodeGene(int id, double bias, NodeType type)
+NodeGene::NodeGene(double bias, NodeType type)
 {
-    this->id = id;
+    this->id = nextID++;
     this->bias = bias;
     this->type = type;
 }
@@ -41,4 +41,20 @@ NodeType NodeGene::getType() const
 vector<const LinkGene*> NodeGene::getToLinks() const
 {
     return toLinks;
+}
+
+void NodeGene::addAccumalator(double value)
+{
+    accumalator += value;
+}
+
+double NodeGene::activate()
+{
+    this->output = activationRelu.activate(accumalator + bias);
+    return output;
+}
+
+void NodeGene::resetAccumalator()
+{
+    accumalator = 0;
 }

@@ -5,6 +5,11 @@ class ActivationRelu
 {
 public:
     double activate(double x);
+    double getOutput() const;
+    void setActivation(double x);
+    
+private:
+    double output;
 };
 
 #endif

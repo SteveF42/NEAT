@@ -12,10 +12,10 @@ public:
     Genome(int inputs, int outputs);
     Genome crossGenomes(const Genome &rhs);
     void mutate();
-    void activate();
+    vector<float> activate(vector<double> inputs);
 
-    vector<LinkGene*> getLinks();
-    vector<NodeGene*> getNodes();
+    vector<LinkGene *> getLinks();
+    vector<NodeGene *> getNodes();
 
     // mutations
     void addNode();
@@ -23,21 +23,20 @@ public:
     void addLink();
     void removeLink();
     bool isDominant(const Genome &rhs);
+
 private:
     float fitness;
     int inputs;
     int outputs;
-    //first n + m nodes are inputs and outputs
-    vector<NodeGene*> nodes;
-    vector<LinkGene*> links;
-    
+    // first n + m nodes are inputs and outputs
+    vector<NodeGene *> nodes;
+    vector<LinkGene *> links;
 
     NodeGene crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
     LinkGene crossLinks(const LinkGene &lhs, const LinkGene &rhs);
 
-    //util
+    // util
     bool containsCycle(int fromNode);
-    bool cycleUtil(int v, bool visited[], bool *rs);
 };
 
 #endif
