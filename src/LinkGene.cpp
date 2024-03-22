@@ -24,6 +24,11 @@ bool LinkGene::isEnabled() const
     return enabled;
 }
 
+int LinkGene::getID() const
+{
+    return LinkeID;
+}
+
 NodeGene* LinkGene::getToNode() const
 {
     return toNode;

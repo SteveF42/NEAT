@@ -9,13 +9,15 @@ using std::vector;
 class Genome
 {
 public:
-    Genome(int inputs, int outputs);
-    Genome crossGenomes(const Genome &rhs);
+    Genome(int inputs, int outputs,bool initInputs=true);
+    void initialize();
     void mutate();
-    vector<float> activate(vector<double> inputs);
+    static Genome crossGenomes(const Genome &dominant, const Genome &recessive);
 
+    vector<float> activate(vector<double> inputs);
     vector<LinkGene *> getLinks();
     vector<NodeGene *> getNodes();
+
 
     // mutations
     void addNode();
@@ -32,11 +34,13 @@ private:
     vector<NodeGene *> nodes;
     vector<LinkGene *> links;
 
-    NodeGene crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
-    LinkGene crossLinks(const LinkGene &lhs, const LinkGene &rhs);
+    static NodeGene crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
+    static LinkGene crossLinks(const LinkGene &lhs, const LinkGene &rhs);
 
     // util
     bool containsCycle(int fromNode);
+    NodeGene* findNode(int nodeID) const;
+    LinkGene* findLink(int linkID) const;
 };
 
 #endif

@@ -11,6 +11,7 @@ public:
     void setEnabled(bool enabled);
     double getWeight() const;
     bool isEnabled() const;
+    int getID() const;
     NodeGene* getToNode() const;
     NodeGene* getFromNode() const;
     

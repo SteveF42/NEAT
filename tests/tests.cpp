@@ -81,3 +81,14 @@ TEST_CASE("Genome activation")
         REQUIRE(true);
     }
 }
+
+TEST_CASE("Genome crossover")
+{
+    Genome genome1(3, 2);
+    Genome genome2(3, 2);
+
+    Genome genome3 = Genome::crossGenomes(genome1, genome2);
+
+    REQUIRE(genome3.getNodes().size() == 5);
+    REQUIRE(genome3.getLinks().size() == 6);
+}

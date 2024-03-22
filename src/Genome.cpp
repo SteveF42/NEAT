@@ -4,12 +4,21 @@
 #include <stack>
 #include <unordered_set>
 
-Genome::Genome(int inputs, int outputs)
+Genome::Genome(int inputs, int outputs, bool initInputs)
 {
     this->inputs = inputs;
     this->outputs = outputs;
     this->fitness = 0;
+
+    if (initInputs)
+    {
+        initialize();
+    }
     // initialize inputs and outputs
+}
+
+void Genome::initialize()
+{
     for (int i = 0; i < inputs; i++)
     {
         nodes.push_back(new NodeGene(1, INPUT));
@@ -29,10 +38,41 @@ Genome::Genome(int inputs, int outputs)
     }
 }
 
-Genome Genome::crossGenomes(const Genome &rhs)
+Genome Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
 {
-    Genome child(inputs, outputs);
+    Genome child(dominant.inputs, dominant.outputs, false);
 
+    // cross nodes
+    for (const auto &dominantNeuron : dominant.nodes)
+    {
+        int nodeID = dominantNeuron->getID();
+        NodeGene *recessiveNeuron = recessive.findNode(nodeID);
+        if (recessiveNeuron == nullptr)
+        {
+            child.nodes.push_back(new NodeGene(*dominantNeuron));
+        }
+        else
+        {
+            NodeGene newNode = crossNeurons(*dominantNeuron, *recessiveNeuron);
+            child.nodes.push_back(new NodeGene(newNode));
+        }
+    }
+
+    // cross links
+    for (const auto &dominantLink : dominant.links)
+    {
+        int linkID = dominantLink->getID();
+        LinkGene *recessiveLink = recessive.findLink(linkID);
+        if (recessiveLink == nullptr)
+        {
+            child.links.push_back(new LinkGene(*dominantLink));
+        }
+        else
+        {
+            LinkGene newLink = crossLinks(*dominantLink, *recessiveLink);
+            child.links.push_back(new LinkGene(newLink));
+        }
+    }
     return child;
 }
 
@@ -59,7 +99,7 @@ vector<float> Genome::activate(vector<double> inputs)
             // set activation to input
             node->output = inputs[i];
         }
-        else if(node->getType() == HIDDEN)
+        else if (node->getType() == HIDDEN)
         {
             // activate the node
             node->activate();
@@ -70,8 +110,8 @@ vector<float> Genome::activate(vector<double> inputs)
             NodeGene *toNode = link->getToNode();
             toNode->addAccumalator(link->getWeight() * node->output);
         }
-        
-        if(node->getType() == OUTPUT)
+
+        if (node->getType() == OUTPUT)
         {
             genomeOutputs.push_back(node->activate());
         }
@@ -258,4 +298,28 @@ bool Genome::containsCycle(int fromNode)
         }
     }
     return false;
+}
+
+NodeGene *Genome::findNode(int nodeID) const
+{
+    for (const auto &node : nodes)
+    {
+        if (node->getID() == nodeID)
+        {
+            return node;
+        }
+    }
+    return nullptr;
+}
+
+LinkGene *Genome::findLink(int linkID) const
+{
+    for (const auto &link : links)
+    {
+        if (link->getID() == linkID)
+        {
+            return link;
+        }
+    }
+    return nullptr;
 }
