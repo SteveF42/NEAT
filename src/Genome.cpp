@@ -38,9 +38,14 @@ void Genome::initialize()
     }
 }
 
-Genome Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
+float Genome::getFitness()
 {
-    Genome child(dominant.inputs, dominant.outputs, false);
+    return fitness;
+}
+
+Genome* Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
+{
+    Genome *child = new Genome(dominant.inputs, dominant.outputs, false);
 
     // cross nodes
     for (const auto &dominantNeuron : dominant.nodes)
@@ -49,12 +54,12 @@ Genome Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
         NodeGene *recessiveNeuron = recessive.findNode(nodeID);
         if (recessiveNeuron == nullptr)
         {
-            child.nodes.push_back(new NodeGene(*dominantNeuron));
+            child->nodes.push_back(new NodeGene(*dominantNeuron));
         }
         else
         {
             NodeGene newNode = crossNeurons(*dominantNeuron, *recessiveNeuron);
-            child.nodes.push_back(new NodeGene(newNode));
+            child->nodes.push_back(new NodeGene(newNode));
         }
     }
 
@@ -65,12 +70,12 @@ Genome Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
         LinkGene *recessiveLink = recessive.findLink(linkID);
         if (recessiveLink == nullptr)
         {
-            child.links.push_back(new LinkGene(*dominantLink));
+            child->links.push_back(new LinkGene(*dominantLink));
         }
         else
         {
             LinkGene newLink = crossLinks(*dominantLink, *recessiveLink);
-            child.links.push_back(new LinkGene(newLink));
+            child->links.push_back(new LinkGene(newLink));
         }
     }
     return child;
@@ -171,8 +176,8 @@ void Genome::addNode()
     int idx = std::min(nodeIdx, (int)(nodes.size() - outputs));
     NodeGene *newNode = new NodeGene(1, HIDDEN);
     // create two new links
-    LinkGene *fromLink = new LinkGene(newNode, link->getFromNode(), 1);
-    LinkGene *toLink = new LinkGene(link->getToNode(), newNode, link->getWeight());
+    LinkGene *fromLink = new LinkGene(newNode, link->getFromNode(), link->getWeight());
+    LinkGene *toLink = new LinkGene(link->getToNode(), newNode, 1);
     links.push_back(fromLink);
     links.push_back(toLink);
     // add the new node
@@ -200,12 +205,14 @@ void Genome::removeNode()
     {
         if ((*it)->getFromNode() == nodeToDelete)
         {
+            delete *it;
             it = links.erase(it);
         }
         else if ((*it)->getToNode() == nodeToDelete)
         {
             it = links.erase(it);
             (*it)->getFromNode()->removeLink(**it);
+            delete *it;
         }
         else
         {
@@ -213,6 +220,7 @@ void Genome::removeNode()
         }
     }
     // remove the node
+    delete nodeToDelete;
     nodes.erase(nodes.begin() + nodeIndex);
 }
 
@@ -255,6 +263,7 @@ void Genome::removeLink()
     int linkIndex = randNumber(links.size());
     LinkGene *link = links[linkIndex];
     link->getFromNode()->removeLink(*link);
+    delete links[linkIndex];
     links.erase(links.begin() + linkIndex);
 }
 
