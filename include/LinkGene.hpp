@@ -10,6 +10,7 @@ public:
     LinkGene(NodeGene* toNode, NodeGene* fromNode, double weight);
     void setEnabled(bool enabled);
     double getWeight() const;
+    void setWeight(double weight);
     bool isEnabled() const;
     int getID() const;
     NodeGene* getToNode() const;

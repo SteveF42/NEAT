@@ -6,17 +6,6 @@
 #include "LinkGene.hpp"
 using std::vector;
 
-struct Config
-{
-    double initMean = 0.0; // mean of initial weight distribution
-    double initStddev = 1.0; // standard deviation of initial weight distribution
-    double min = -20.0; // minimum weight value
-    double max = 20.0; // maximum weight value
-    double mutationRate = 0.8; // probability of mutation
-    double mutatePower = 0.5; // power of mutation
-    double replaceRate = 0.1; // probability of replacing weights
-};
-
 class Genome
 {
 public:
@@ -24,6 +13,7 @@ public:
     void initialize();
     double getFitness();
     void mutate();
+    double distance(const Genome &other);
     static Genome *crossGenomes(const Genome &dominant, const Genome &recessive);
 
     vector<float> activate(vector<double> inputs);
@@ -35,7 +25,10 @@ public:
     void removeNode();
     void addLink();
     void removeLink();
-    bool isDominant(const Genome &rhs);
+    void weightRandom();
+    void toggleWeight();
+    void weightShift();
+    void shiftBias();
 
 private:
     double fitness;
@@ -50,6 +43,8 @@ private:
 
     // util
     bool containsCycle(int fromNode);
+    NodeGene* getRandomNode();
+    LinkGene* getRandomLink();
     NodeGene *findNode(int nodeID) const;
     LinkGene *findLink(int linkID) const;
 };

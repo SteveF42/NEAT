@@ -38,12 +38,69 @@ void Genome::initialize()
     }
 }
 
-float Genome::getFitness()
+double Genome::getFitness()
 {
     return fitness;
 }
 
-Genome* Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
+double Genome::distance(const Genome &other)
+{
+    // calculate the distance between two genomes
+    int s1 = this->links.size();
+    int s2 = other.links.size();
+
+    int p1 = 0;
+    int p2 = 0;
+
+    int excess = 0;
+    int similar = 0;
+    int disjoint = 0;
+    double weightDiff = 0;
+
+    if (s1 > 0 && s2 > 0)
+    {
+        while (p1 < s1 || p2 < s2)
+        {
+            LinkGene *conn1 = this->links[p1];
+            LinkGene *conn2 = other.links[p2];
+
+            if (conn1->getID() == conn2->getID())
+            {
+                similar++;
+                weightDiff += std::abs(conn1->getWeight() - conn2->getWeight());
+                p1++;
+                p2++;
+            }
+            else if (conn1->getID() < conn2->getID())
+            {
+                disjoint++;
+                p1++;
+            }
+            else
+            {
+                disjoint++;
+                p2++;
+            }
+        }
+
+        excess = std::max(s1 - p1, s2 - p2);
+        weightDiff /= similar;
+    }
+    else if (s1 > 0)
+    {
+        excess = s1;
+    }
+    else
+    {
+        excess = s2;
+    }
+
+    double N = std::max(s1, s2);
+    double distance = ((Config::excessCoefficient * excess + N + Config::disjointCoefficient * disjoint) / N) + Config::weightDiffCoefficient * weightDiff;
+    return distance;
+}
+
+Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
 {
     Genome *child = new Genome(dominant.inputs, dominant.outputs, false);
 
@@ -138,21 +195,37 @@ void Genome::mutate()
 {
     // mutate 50% of the time
     int mutation = randNumber(4);
-    if (mutation == 0)
+    if (randDouble(0, 1) > Config::mutateNodeProbability)
     {
         addNode();
     }
-    else if (mutation == 1)
+    else if (randDouble(0, 1) > Config::mutateNodeProbability)
     {
         removeNode();
     }
-    else if (mutation == 2)
+    if (randDouble(0, 1) > Config::mutateLinkProbability)
     {
         addLink();
     }
-    else if (mutation == 3)
+    else if (randDouble(0, 1) > Config::mutateLinkProbability)
     {
         removeLink();
+    }
+    if (randDouble(0, 1) > Config::mutateEnableLinkProbability)
+    {
+        toggleWeight();
+    }
+    if (randDouble(0, 1) > Config::mutateWeightShiftProbability)
+    {
+        weightShift();
+    }
+    if (randDouble(0, 1) > Config::mutateWeightRandomProbability)
+    {
+        weightRandom();
+    }
+    if(randDouble(0, 1) > Config::mutateBiasShiftProbability)
+    {
+        shiftBias();
     }
 }
 
@@ -203,16 +276,18 @@ void Genome::removeNode()
     // remove all links to and from the node
     for (auto it = links.begin(); it != links.end();)
     {
-        if ((*it)->getFromNode() == nodeToDelete)
+        LinkGene *link = *it;
+        if (link->getFromNode() == nodeToDelete)
         {
-            delete *it;
             it = links.erase(it);
+            link->getToNode()->removeLink(*link);
+            delete link;
         }
-        else if ((*it)->getToNode() == nodeToDelete)
+        else if (link->getToNode() == nodeToDelete)
         {
             it = links.erase(it);
-            (*it)->getFromNode()->removeLink(**it);
-            delete *it;
+            link->getFromNode()->removeLink(*link);
+            delete link;
         }
         else
         {
@@ -248,7 +323,7 @@ void Genome::addLink()
     }
 
     // create the link
-    LinkGene *newLink = new LinkGene(toNode, fromNode, 1);
+    LinkGene *newLink = new LinkGene(toNode, fromNode, randDouble(Config::min, Config::max));
     fromNode->addToLink(*newLink);
     links.push_back(newLink);
 }
@@ -265,6 +340,36 @@ void Genome::removeLink()
     link->getFromNode()->removeLink(*link);
     delete links[linkIndex];
     links.erase(links.begin() + linkIndex);
+}
+
+void Genome::weightShift()
+{
+    LinkGene *link = getRandomLink();
+    double adjustWeight = randDouble(-1, 1) + link->getWeight();
+    adjustWeight = std::min(adjustWeight, Config::max);
+    adjustWeight = std::max(adjustWeight, Config::min);
+    link->setWeight(adjustWeight);
+}
+
+void Genome::toggleWeight()
+{
+    LinkGene *link = getRandomLink();
+    link->setEnabled(!link->isEnabled());
+}
+
+void Genome::weightRandom()
+{
+    LinkGene *link = getRandomLink();
+    link->setWeight(randDouble(-1, 1));
+}
+
+void Genome::shiftBias()
+{
+    NodeGene *node = getRandomNode();
+    double adjustBias = (randDouble(-1, 1) * Config::weightShiftStrength) + node->getBias();
+    adjustBias = std::min(adjustBias, Config::max);
+    adjustBias = std::max(adjustBias, Config::min);
+    node->setBias(adjustBias);
 }
 
 NodeGene Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
@@ -307,6 +412,17 @@ bool Genome::containsCycle(int fromNode)
         }
     }
     return false;
+}
+
+NodeGene *Genome::getRandomNode()
+{
+    int range = nodes.size() - inputs - outputs;
+    return nodes[randNumber(range) + inputs];
+}
+
+LinkGene *Genome::getRandomLink()
+{
+    return links[randNumber(links.size())];
 }
 
 NodeGene *Genome::findNode(int nodeID) const

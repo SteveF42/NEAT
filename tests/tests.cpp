@@ -1,6 +1,7 @@
 #include <iostream>
 #include "Genome.hpp"
 #include "catch_amalgamated.hpp"
+#include "Util.hpp"
 
 TEST_CASE("Genome links initialized correctly")
 {
@@ -87,8 +88,20 @@ TEST_CASE("Genome crossover")
     Genome genome1(3, 2);
     Genome genome2(3, 2);
 
-    Genome genome3 = Genome::crossGenomes(genome1, genome2);
+    Genome* genome3 = Genome::crossGenomes(genome1, genome2);
 
-    REQUIRE(genome3.getNodes().size() == 5);
-    REQUIRE(genome3.getLinks().size() == 6);
+    REQUIRE(genome3->getNodes().size() == 5);
+    REQUIRE(genome3->getLinks().size() == 6);
+}
+
+TEST_CASE("Other mutations")
+{
+    Genome genome(1, 1);
+    genome.weightRandom();
+    genome.toggleWeight();
+    genome.weightShift();
+    genome.shiftBias();
+
+    double weight = genome.getLinks()[0]->getWeight();
+    REQUIRE((weight > Config::min && weight < Config::max));
 }

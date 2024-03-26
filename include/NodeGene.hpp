@@ -21,10 +21,13 @@ public:
     NodeGene(double bias, NodeType type);
     void addToLink(const LinkGene &link);
     void removeLink(const LinkGene &link);
+    
     int getID() const;
     double getBias() const;
+    void setBias(double bias);
     NodeType getType() const;
     vector<const LinkGene*> getToLinks() const;
+
     void addAccumalator(double value);
     void resetAccumalator();
     double activate();

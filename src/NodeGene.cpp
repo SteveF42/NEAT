@@ -16,7 +16,7 @@ void NodeGene::removeLink(const LinkGene &link)
 {
     for (int i = 0; i < toLinks.size(); i++)
     {
-        if (toLinks[i]->getFromNode()->getID() == link.getFromNode()->getID() && toLinks[i]->getToNode()->getID() == link.getToNode()->getID())
+        if(toLinks[i]->getID() == link.getID())
         {
             toLinks.erase(toLinks.begin() + i);
             return;
@@ -31,6 +31,11 @@ int NodeGene::getID() const
 double NodeGene::getBias() const
 {
     return bias;
+}
+
+void NodeGene::setBias(double bias)
+{
+    this->bias = bias;
 }
 
 NodeType NodeGene::getType() const

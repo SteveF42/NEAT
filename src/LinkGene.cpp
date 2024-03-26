@@ -19,6 +19,11 @@ double LinkGene::getWeight() const
     return weight;
 }
 
+void LinkGene::setWeight(double weight)
+{
+    this->weight = weight;
+}
+
 bool LinkGene::isEnabled() const
 {
     return enabled;
