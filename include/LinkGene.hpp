@@ -7,20 +7,24 @@ class NodeGene;
 class LinkGene
 {
 public:
-    LinkGene(NodeGene* toNode, NodeGene* fromNode, double weight);
+    LinkGene(NodeGene *toNode, NodeGene *fromNode, double weight);
+    LinkGene(NodeGene *toNode, NodeGene *fromNode, double weight, int id);
+    LinkGene(LinkGene &other);
     void setEnabled(bool enabled);
     double getWeight() const;
     void setWeight(double weight);
     bool isEnabled() const;
     int getID() const;
-    NodeGene* getToNode() const;
-    NodeGene* getFromNode() const;
-    
+    NodeGene *getToNode() const;
+    NodeGene *getFromNode() const;
+
+    static void setNextID(int id);
+
+    inline static int nextID = 0;
 private:
     int LinkeID;
-    inline static int nextID = 0;
-    NodeGene* toNode;
-    NodeGene* fromNode;
+    NodeGene *toNode;
+    NodeGene *fromNode;
     double weight;
     bool enabled;
 };

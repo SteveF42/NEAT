@@ -7,6 +7,7 @@ using std::vector;
 class Species
 {
 public:
+    Genome* getLeader() const;
     double getScore();
     int getSpeciesSize();
 

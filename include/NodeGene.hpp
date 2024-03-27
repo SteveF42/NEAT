@@ -18,29 +18,33 @@ enum NodeType
 class NodeGene
 {
 public:
-    NodeGene(double bias, NodeType type);
+    NodeGene(int id, NodeType type);
+    NodeGene(NodeType type, double bias);
+    NodeGene(int id, NodeType type, double bias);
+    NodeGene(NodeGene &other);
     void addToLink(const LinkGene &link);
     void removeLink(const LinkGene &link);
-    
+
     int getID() const;
     double getBias() const;
     void setBias(double bias);
     NodeType getType() const;
-    vector<const LinkGene*> getToLinks() const;
+    vector<const LinkGene *> getToLinks() const;
 
     void addAccumalator(double value);
     void resetAccumalator();
     double activate();
     double output;
 
+    static void setNextID(int id);
+    inline static int nextID = 0;
 private:
     double bias;
     double accumalator;
-    inline static int nextID = 0;
     int id;
     NodeType type;
     ActivationRelu activationRelu;
-    vector<const LinkGene*> toLinks;
+    vector<const LinkGene *> toLinks;
 };
 
 #endif

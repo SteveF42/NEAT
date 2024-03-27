@@ -1,12 +1,31 @@
 #include "Linkgene.hpp"
 
-LinkGene::LinkGene(NodeGene* toNode, NodeGene* fromNode, double weight)
+
+LinkGene::LinkGene(NodeGene *toNode, NodeGene *fromNode, double weight)
 {
     this->LinkeID = nextID++;
     this->fromNode = fromNode;
     this->toNode = toNode;
     this->weight = weight;
     this->enabled = true;
+}
+
+LinkGene::LinkGene(NodeGene *toNode, NodeGene *fromNode, double weight, int id)
+{
+    this->LinkeID = id;
+    this->fromNode = fromNode;
+    this->toNode = toNode;
+    this->weight = weight;
+    this->enabled = enabled;
+}
+
+LinkGene::LinkGene(LinkGene &other)
+{
+    this->LinkeID = other.LinkeID;
+    this->fromNode = other.fromNode;
+    this->toNode = other.toNode;
+    this->weight = other.weight;
+    this->enabled = other.enabled;
 }
 
 void LinkGene::setEnabled(bool enabled)
@@ -34,12 +53,17 @@ int LinkGene::getID() const
     return LinkeID;
 }
 
-NodeGene* LinkGene::getToNode() const
+NodeGene *LinkGene::getToNode() const
 {
     return toNode;
 }
 
-NodeGene* LinkGene::getFromNode() const
+NodeGene *LinkGene::getFromNode() const
 {
     return fromNode;
-}   
+}
+
+void LinkGene::setNextID(int id)
+{
+    LinkGene::nextID = id;
+}

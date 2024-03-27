@@ -2,6 +2,7 @@
 #include "Genome.hpp"
 #include "catch_amalgamated.hpp"
 #include "Util.hpp"
+#include "Neat.hpp"
 
 TEST_CASE("Genome links initialized correctly")
 {
@@ -104,4 +105,19 @@ TEST_CASE("Other mutations")
 
     double weight = genome.getLinks()[0]->getWeight();
     REQUIRE((weight > Config::min && weight < Config::max));
+}
+
+TEST_CASE("Neat Framework")
+{
+    Neat neat(3,2);
+    neat.initialize(500);
+
+    REQUIRE(neat.getGenomes().size() == 500);
+    neat.evolve();
+    REQUIRE(neat.getGenomes().size() == 500);
+    neat.evolve();
+    neat.evolve();
+    neat.evolve();
+    neat.evolve();
+    REQUIRE(neat.getGenomes().size() == 500);
 }

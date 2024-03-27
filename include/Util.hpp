@@ -11,7 +11,7 @@ struct Config
 {
     inline const static double min = -20;
     inline const static double max = 20;
-    inline const static double deathRate = 0.5;
+    inline const static double deathRate = 0.3;
     inline const static double excessCoefficient = 0.20;
     inline const static double disjointCoefficient = 0.20;
     inline const static double weightDiffCoefficient = 0.20;
@@ -21,7 +21,7 @@ struct Config
     inline const static double mutateWeightShiftProbability = 0.80;
     inline const static double mutateWeightRandomProbability = 0.40;
     inline const static double mutateEnableLinkProbability = 0.01;
-    inline const static double speciationThreshold = 1.0;
+    inline const static double speciationThreshold = 1.3;
     inline const static double mutateBiasShiftProbability = 0.50;
 };
 

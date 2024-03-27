@@ -21,19 +21,22 @@ void Genome::initialize()
 {
     for (int i = 0; i < inputs; i++)
     {
-        nodes.push_back(new NodeGene(1, INPUT));
+        nodes.push_back(new NodeGene(i, INPUT));
     }
     for (int i = 0; i < outputs; i++)
     {
-        nodes.push_back(new NodeGene(0, OUTPUT));
+        nodes.push_back(new NodeGene(i + inputs, OUTPUT));
     }
 
     // initialize links
+    int idx = 0;
     for (int i = 0; i < inputs; i++)
     {
         for (int j = 0; j < outputs; j++)
         {
-            links.push_back(new LinkGene(nodes[j + inputs], nodes[i], 1));
+            LinkGene *newLink = new LinkGene(nodes[j + inputs], nodes[i], randDouble(-1, 1), idx++);
+            nodes[i]->addToLink(*newLink);
+            links.push_back(newLink);
         }
     }
 }
@@ -59,7 +62,7 @@ double Genome::distance(const Genome &other)
 
     if (s1 > 0 && s2 > 0)
     {
-        while (p1 < s1 || p2 < s2)
+        while (p1 < s1 && p2 < s2)
         {
             LinkGene *conn1 = this->links[p1];
             LinkGene *conn2 = other.links[p2];
@@ -115,8 +118,8 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
         }
         else
         {
-            NodeGene newNode = crossNeurons(*dominantNeuron, *recessiveNeuron);
-            child->nodes.push_back(new NodeGene(newNode));
+            NodeGene *newNode = crossNeurons(*dominantNeuron, *recessiveNeuron);
+            child->nodes.push_back(newNode);
         }
     }
 
@@ -127,12 +130,15 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
         LinkGene *recessiveLink = recessive.findLink(linkID);
         if (recessiveLink == nullptr)
         {
-            child->links.push_back(new LinkGene(*dominantLink));
+            LinkGene *newLink = new LinkGene(*dominantLink);
+            child->findNode(dominantLink->getFromNode()->getID())->addToLink(*newLink);
+            child->links.push_back(newLink);
         }
         else
         {
-            LinkGene newLink = crossLinks(*dominantLink, *recessiveLink);
-            child->links.push_back(new LinkGene(newLink));
+            LinkGene *newLink = crossLinks(*dominantLink, *recessiveLink);
+            child->findNode(dominantLink->getFromNode()->getID())->addToLink(*newLink);
+            child->links.push_back(newLink);
         }
     }
     return child;
@@ -195,35 +201,35 @@ void Genome::mutate()
 {
     // mutate 50% of the time
     int mutation = randNumber(4);
-    if (randDouble(0, 1) > Config::mutateNodeProbability)
+    if (randDouble(0, 1) < Config::mutateNodeProbability)
     {
         addNode();
     }
-    else if (randDouble(0, 1) > Config::mutateNodeProbability)
+    else if (randDouble(0, 1) < Config::mutateNodeProbability)
     {
         removeNode();
     }
-    if (randDouble(0, 1) > Config::mutateLinkProbability)
+    if (randDouble(0, 1) < Config::mutateLinkProbability)
     {
         addLink();
     }
-    else if (randDouble(0, 1) > Config::mutateLinkProbability)
+    else if (randDouble(0, 1) < Config::mutateLinkProbability)
     {
         removeLink();
     }
-    if (randDouble(0, 1) > Config::mutateEnableLinkProbability)
+    if (randDouble(0, 1) < Config::mutateEnableLinkProbability)
     {
         toggleWeight();
     }
-    if (randDouble(0, 1) > Config::mutateWeightShiftProbability)
+    if (randDouble(0, 1) < Config::mutateWeightShiftProbability)
     {
         weightShift();
     }
-    if (randDouble(0, 1) > Config::mutateWeightRandomProbability)
+    if (randDouble(0, 1) < Config::mutateWeightRandomProbability)
     {
         weightRandom();
     }
-    if(randDouble(0, 1) > Config::mutateBiasShiftProbability)
+    if (randDouble(0, 1) < Config::mutateBiasShiftProbability)
     {
         shiftBias();
     }
@@ -247,16 +253,16 @@ void Genome::addNode()
         }
     }
     int idx = std::min(nodeIdx, (int)(nodes.size() - outputs));
-    NodeGene *newNode = new NodeGene(1, HIDDEN);
+    NodeGene *newNode = new NodeGene(HIDDEN, 1);
     // create two new links
-    LinkGene *fromLink = new LinkGene(newNode, link->getFromNode(), link->getWeight());
-    LinkGene *toLink = new LinkGene(link->getToNode(), newNode, 1);
-    links.push_back(fromLink);
-    links.push_back(toLink);
+    LinkGene *toNewNode = new LinkGene(newNode, link->getFromNode(), link->getWeight());
+    LinkGene *fromNewNode = new LinkGene(link->getToNode(), newNode, 1);
+    links.push_back(toNewNode);
+    links.push_back(fromNewNode);
     // add the new node
     nodes.insert(nodes.begin() + idx, newNode);
-    newNode->addToLink(*fromLink);
-    link->getFromNode()->addToLink(*toLink);
+    newNode->addToLink(*fromNewNode);
+    link->getFromNode()->addToLink(*toNewNode);
 }
 
 void Genome::removeNode()
@@ -310,7 +316,7 @@ void Genome::addLink()
     // check if the link already exists
     for (LinkGene *link : links)
     {
-        if (link->getFromNode()->getID() == fromNode->getID() && link->getToNode()->getID() == toNode->getID())
+        if (link->getFromNode() == fromNode && link->getToNode() == toNode)
         {
             link->setEnabled(true);
             return;
@@ -372,19 +378,22 @@ void Genome::shiftBias()
     node->setBias(adjustBias);
 }
 
-NodeGene Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
+NodeGene *Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
 {
     int id = lhs.getID();
     double bias = randNumber(2) == 0 ? lhs.getBias() : rhs.getBias();
-    return NodeGene(bias, lhs.getType());
+
+    auto newNode = new NodeGene(id, lhs.getType(), bias);
+    return newNode;
 }
 
-LinkGene Genome::crossLinks(const LinkGene &lhs, const LinkGene &rhs)
+// CHANGE ALL NODES VECTOR TO AN UNORDERED MAP FOR FASTER ACCESS TIMES AND EASIER NODE DELETION
+LinkGene *Genome::crossLinks(const LinkGene &lhs, const LinkGene &rhs)
 {
     double weight = randNumber(2) == 0 ? lhs.getWeight() : rhs.getWeight();
     bool enabled = randNumber(2) == 0 ? lhs.isEnabled() : rhs.isEnabled();
-    LinkGene child(lhs.getFromNode(), lhs.getToNode(), weight);
-    child.setEnabled(enabled);
+    auto child = new LinkGene(lhs.getFromNode(), lhs.getToNode(), weight, lhs.getID());
+    child->setEnabled(enabled);
     return child;
 }
 
@@ -447,4 +456,14 @@ LinkGene *Genome::findLink(int linkID) const
         }
     }
     return nullptr;
+}
+
+bool Genome::operator<(const Genome &other)
+{
+    return this->fitness < other.fitness;
+}
+
+bool Genome::operator>(const Genome &other)
+{
+    return this->fitness > other.fitness;
 }

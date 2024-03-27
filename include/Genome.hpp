@@ -30,6 +30,9 @@ public:
     void weightShift();
     void shiftBias();
 
+    bool operator<(const Genome &other);
+    bool operator>(const Genome &other);
+
 private:
     double fitness;
     int inputs;
@@ -38,8 +41,8 @@ private:
     vector<NodeGene *> nodes;
     vector<LinkGene *> links;
 
-    static NodeGene crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
-    static LinkGene crossLinks(const LinkGene &lhs, const LinkGene &rhs);
+    static NodeGene* crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
+    static LinkGene* crossLinks(const LinkGene &lhs, const LinkGene &rhs);
 
     // util
     bool containsCycle(int fromNode);

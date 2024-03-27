@@ -2,6 +2,10 @@
 #include "Util.hpp"
 #include <algorithm>
 
+Genome *Species::getLeader() const
+{
+    return leader;
+}
 double Species::getScore()
 {
     return score;
@@ -14,6 +18,7 @@ int Species::getSpeciesSize()
 
 void Species::setLeader(Genome *leader)
 {
+    members.push_back(leader);
     this->leader = leader;
 }
 
@@ -24,6 +29,7 @@ void Species::setScore(double score)
 
 void Species::addMember(Genome *member)
 {
+    members.push_back(member);
 }
 
 void Species::kill(double percentage)
@@ -33,7 +39,7 @@ void Species::kill(double percentage)
     std::sort(members.begin(), members.end(), [](Genome *a, Genome *b)
               { return a->getFitness() > b->getFitness(); });
     // Remove the lowest performing genomes
-    members.erase(members.begin() + numToKill, members.end());
+    members.erase(members.end() - numToKill, members.end());
 }
 
 void Species::evaluateScore()
@@ -51,7 +57,12 @@ Genome *Species::breed()
     int size = members.size();
     Genome *g1 = members[randNumber(size)];
     Genome *g2 = members[randNumber(size)];
-    return Genome::crossGenomes(*g1, *g2);
+
+    if (*g1 > *g2)
+        return Genome::crossGenomes(*g1,*g2);
+    else
+        return Genome::crossGenomes(*g2,*g1);
+
 }
 
 void Species::clear()
