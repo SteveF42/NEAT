@@ -13,6 +13,8 @@ TEST_CASE("Genome links initialized correctly")
 TEST_CASE("Add/remove node mutation")
 {
     Genome genome(2, 1);
+    LinkGene::nextID = 2 * 1 + 1;
+    NodeGene::nextID = 2 + 1 + 1;
 
     genome.removeNode();
     REQUIRE(genome.getNodes().size() == 3);
@@ -42,17 +44,19 @@ TEST_CASE("Add/remove node mutation")
 TEST_CASE("Removing a link/ adding a link mutation")
 {
     Genome genome(3, 2);
+    LinkGene::nextID = 3 * 2 + 1;
+    NodeGene::nextID = 3 + 2 + 1;
     REQUIRE(genome.getLinks().size() == 6);
     genome.removeLink();
-    REQUIRE(genome.getLinks().size() == 5);
+    REQUIRE(genome.getLinks().size() == 6);
     genome.removeLink();
     genome.removeLink();
     genome.removeLink();
     genome.removeLink();
     genome.removeLink();
-    REQUIRE(genome.getLinks().size() == 0);
+    REQUIRE(genome.getLinks().size() == 6);
     genome.addLink();
-    REQUIRE(genome.getLinks().size() == 1);
+    REQUIRE(genome.getLinks().size() == 6);
 }
 
 TEST_CASE("Genome activation")
@@ -88,8 +92,10 @@ TEST_CASE("Genome crossover")
 {
     Genome genome1(3, 2);
     Genome genome2(3, 2);
+    LinkGene::nextID = 3 * 2 + 1;
+    NodeGene::nextID = 3 + 2 + 1;
 
-    Genome* genome3 = Genome::crossGenomes(genome1, genome2);
+    Genome *genome3 = Genome::crossGenomes(genome1, genome2);
 
     REQUIRE(genome3->getNodes().size() == 5);
     REQUIRE(genome3->getLinks().size() == 6);
@@ -109,15 +115,15 @@ TEST_CASE("Other mutations")
 
 TEST_CASE("Neat Framework")
 {
-    Neat neat(3,2);
+    Neat neat(3, 2);
     neat.initialize(500);
 
     REQUIRE(neat.getGenomes().size() == 500);
     neat.evolve();
     REQUIRE(neat.getGenomes().size() == 500);
-    neat.evolve();
-    neat.evolve();
-    neat.evolve();
-    neat.evolve();
+    for(int i = 0; i < 100; i++)
+    {
+        neat.evolve();
+    }
     REQUIRE(neat.getGenomes().size() == 500);
 }

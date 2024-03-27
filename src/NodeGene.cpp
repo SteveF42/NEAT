@@ -25,7 +25,6 @@ NodeGene::NodeGene(NodeGene &other)
     this->id = other.id;
     this->bias = other.bias;
     this->type = other.type;
-    this->toLinks = other.toLinks;
 }
 void NodeGene::addToLink(const LinkGene &link)
 {

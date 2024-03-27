@@ -15,8 +15,8 @@ void Neat::initialize(int population)
     {
         allGenomes.push_back(new Genome(input, output, true));
     }
-    LinkGene::setNextID(input + output + 1);
-    NodeGene::setNextID(input + output + 1);
+    LinkGene::setNextID(input * output);
+    NodeGene::setNextID(input + output);
 }
 
 void Neat::evolve()

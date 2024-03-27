@@ -3,6 +3,7 @@
 #include "random"
 #include <stack>
 #include <unordered_set>
+#include <unordered_map>
 
 Genome::Genome(int inputs, int outputs, bool initInputs)
 {
@@ -106,6 +107,7 @@ double Genome::distance(const Genome &other)
 Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
 {
     Genome *child = new Genome(dominant.inputs, dominant.outputs, false);
+    std::unordered_map<int, NodeGene *> nodeMap;
 
     // cross nodes
     for (const auto &dominantNeuron : dominant.nodes)
@@ -114,12 +116,15 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
         NodeGene *recessiveNeuron = recessive.findNode(nodeID);
         if (recessiveNeuron == nullptr)
         {
-            child->nodes.push_back(new NodeGene(*dominantNeuron));
+            NodeGene *newNode = new NodeGene(*dominantNeuron);
+            child->nodes.push_back(newNode);
+            nodeMap.insert({nodeID, newNode});
         }
         else
         {
             NodeGene *newNode = crossNeurons(*dominantNeuron, *recessiveNeuron);
             child->nodes.push_back(newNode);
+            nodeMap.insert({nodeID, newNode});
         }
     }
 
@@ -130,14 +135,25 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
         LinkGene *recessiveLink = recessive.findLink(linkID);
         if (recessiveLink == nullptr)
         {
-            LinkGene *newLink = new LinkGene(*dominantLink);
-            child->findNode(dominantLink->getFromNode()->getID())->addToLink(*newLink);
+            int id1 = dominantLink->getFromNode()->getID();
+            int id2 = dominantLink->getToNode()->getID();
+            NodeGene *fromNode = nodeMap[id1];
+            NodeGene *toNode = nodeMap[id2];
+
+            LinkGene *newLink = new LinkGene(toNode, fromNode, dominantLink->getWeight(), linkID);
+            fromNode->addToLink(*newLink);
             child->links.push_back(newLink);
         }
         else
         {
-            LinkGene *newLink = crossLinks(*dominantLink, *recessiveLink);
-            child->findNode(dominantLink->getFromNode()->getID())->addToLink(*newLink);
+            NodeGene *fromNode = nodeMap[dominantLink->getFromNode()->getID()];
+            NodeGene *toNode = nodeMap[dominantLink->getToNode()->getID()];
+
+            double weight = randNumber(2) == 0 ? dominantLink->getWeight() : recessiveLink->getWeight();
+            bool enabled = randNumber(2) == 0 ? dominantLink->isEnabled() : recessiveLink->isEnabled();
+            LinkGene *newLink = new LinkGene(toNode, fromNode, weight, linkID);
+            newLink->setEnabled(enabled);
+            fromNode->addToLink(*newLink);
             child->links.push_back(newLink);
         }
     }
@@ -199,8 +215,6 @@ vector<NodeGene *> Genome::getNodes()
 
 void Genome::mutate()
 {
-    // mutate 50% of the time
-    int mutation = randNumber(4);
     if (randDouble(0, 1) < Config::mutateNodeProbability)
     {
         addNode();
@@ -286,7 +300,6 @@ void Genome::removeNode()
         if (link->getFromNode() == nodeToDelete)
         {
             it = links.erase(it);
-            link->getToNode()->removeLink(*link);
             delete link;
         }
         else if (link->getToNode() == nodeToDelete)
@@ -309,7 +322,7 @@ void Genome::addLink()
 {
     // from node can be inputs or hidden. to nodes can be hidden or outputs
     int fromNodeIndex = randNumber(nodes.size() - outputs);
-    int toNodeIndex = randNumber(outputs) + inputs;
+    int toNodeIndex = randNumber(nodes.size() - inputs) + inputs;
 
     NodeGene *fromNode = nodes[fromNodeIndex];
     NodeGene *toNode = nodes[toNodeIndex];
@@ -343,6 +356,12 @@ void Genome::removeLink()
     }
     int linkIndex = randNumber(links.size());
     LinkGene *link = links[linkIndex];
+
+    //prevents input and output links from being removed
+    if (link->getFromNode()->getType() == INPUT && link->getToNode()->getType() == OUTPUT)
+    {
+        return;
+    }
     link->getFromNode()->removeLink(*link);
     delete links[linkIndex];
     links.erase(links.begin() + linkIndex);
