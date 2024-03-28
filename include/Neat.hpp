@@ -9,42 +9,31 @@ class Neat
 public:
     Neat(int input, int output);
     void initialize(int population = 500);
+    void train(int genCount);
     void evolve();
     void clear();
+    void test();
 
-    vector<Genome *> getGenomes() const
-    {
-        return allGenomes;
-    }
-    vector<Species *> getSpecies() const
-    {
-        return allSpecies;
-    }
-    int getPopulation() const
-    {
-        return population;
-    }
+    vector<Genome *> getGenomes() const;
+    vector<Species *> getSpecies() const;
+    int getPopulation() const;
+    friend std::ostream &operator<<(std::ostream &os, const Neat &other);
 
-    friend std::ostream& operator<<(std::ostream& os, const Neat &other)
-    {
-        os << "Population: " << other.population << '\n';
-        os << "Genomes: " << other.allGenomes.size() << '\n';
-        for (auto species : other.allSpecies)
-        {
-            os << "Species size: ";
-            os << other.allSpecies.size() << '\n';
-        }
-        return os;
-    }
-
-private:
+protected:
     int input;
     int output;
     int population;
+    int genCount = 0;
+    Genome *bestGenome;
     vector<Genome *> allGenomes;
     vector<Species *> allSpecies;
     vector<NodeGene *> allNodes;
+    // inherited class will implement playGame
+    virtual double playGame(Genome *genome) = 0;
+    virtual void testNetwork(Genome *genome) = 0;
+    void trainGeneration();
 
+private:
     void speciate();
     void kill();
     void breed();

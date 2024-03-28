@@ -47,6 +47,11 @@ double Genome::getFitness()
     return fitness;
 }
 
+void Genome::setFitness(double fitness)
+{
+    this->fitness = fitness;
+}
+
 double Genome::distance(const Genome &other)
 {
     // calculate the distance between two genomes
@@ -160,9 +165,9 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
     return child;
 }
 
-vector<float> Genome::activate(vector<double> inputs)
+vector<double> Genome::activate(vector<double> inputs)
 {
-    vector<float> genomeOutputs;
+    vector<double> genomeOutputs;
     int outIdx = 0;
     if (inputs.size() != this->inputs)
     {
@@ -191,6 +196,8 @@ vector<float> Genome::activate(vector<double> inputs)
 
         for (auto link : node->getToLinks())
         {
+            if (link->isEnabled() == false)
+                continue;
             NodeGene *toNode = link->getToNode();
             toNode->addAccumalator(link->getWeight() * node->output);
         }
@@ -200,6 +207,8 @@ vector<float> Genome::activate(vector<double> inputs)
             genomeOutputs.push_back(node->activate());
         }
     }
+    // normalizes the output from 0.0-1.0
+    activationSoftmax(genomeOutputs);
     return genomeOutputs;
 }
 
@@ -357,7 +366,7 @@ void Genome::removeLink()
     int linkIndex = randNumber(links.size());
     LinkGene *link = links[linkIndex];
 
-    //prevents input and output links from being removed
+    // prevents input and output links from being removed
     if (link->getFromNode()->getType() == INPUT && link->getToNode()->getType() == OUTPUT)
     {
         return;
@@ -485,4 +494,18 @@ bool Genome::operator<(const Genome &other)
 bool Genome::operator>(const Genome &other)
 {
     return this->fitness > other.fitness;
+}
+
+void Genome::activationSoftmax(vector<double> &v)
+{
+    double sum = 0;
+    for (auto &val : v)
+    {
+        val = std::exp2(val);
+        sum += val;
+    }
+    for (auto &val : v)
+    {
+        val /= sum;
+    }
 }

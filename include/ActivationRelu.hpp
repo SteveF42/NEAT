@@ -7,7 +7,17 @@ public:
     double activate(double x);
     double getOutput() const;
     void setActivation(double x);
-    
+
+private:
+    double output;
+};
+
+class ActivationSigmoid
+{
+public:
+    double activate(double x);
+    double getOutput() const;
+
 private:
     double output;
 };

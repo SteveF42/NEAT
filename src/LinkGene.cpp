@@ -16,7 +16,7 @@ LinkGene::LinkGene(NodeGene *toNode, NodeGene *fromNode, double weight, int id)
     this->fromNode = fromNode;
     this->toNode = toNode;
     this->weight = weight;
-    this->enabled = enabled;
+    this->enabled = true;
 }
 
 LinkGene::LinkGene(LinkGene &other)

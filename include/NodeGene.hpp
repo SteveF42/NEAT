@@ -44,6 +44,7 @@ private:
     int id;
     NodeType type;
     ActivationRelu activationRelu;
+    
     vector<const LinkGene *> toLinks;
 };
 

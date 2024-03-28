@@ -12,11 +12,12 @@ public:
     Genome(int inputs, int outputs, bool initInputs = true);
     void initialize();
     double getFitness();
+    void setFitness(double fitness);
     void mutate();
     double distance(const Genome &other);
     static Genome *crossGenomes(const Genome &dominant, const Genome &recessive);
 
-    vector<float> activate(vector<double> inputs);
+    vector<double> activate(vector<double> inputs);
     vector<LinkGene *> getLinks();
     vector<NodeGene *> getNodes();
 
@@ -50,6 +51,7 @@ private:
     LinkGene* getRandomLink();
     NodeGene *findNode(int nodeID) const;
     LinkGene *findLink(int linkID) const;
+    void activationSoftmax(vector<double> &v);
 };
 
 #endif

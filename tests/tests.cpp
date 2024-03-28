@@ -2,7 +2,7 @@
 #include "Genome.hpp"
 #include "catch_amalgamated.hpp"
 #include "Util.hpp"
-#include "Neat.hpp"
+#include "XOR.hpp"
 
 TEST_CASE("Genome links initialized correctly")
 {
@@ -115,15 +115,18 @@ TEST_CASE("Other mutations")
 
 TEST_CASE("Neat Framework")
 {
-    Neat neat(3, 2);
-    neat.initialize(500);
+    Xor test;
+    test.initialize(100);
 
-    REQUIRE(neat.getGenomes().size() == 500);
-    neat.evolve();
-    REQUIRE(neat.getGenomes().size() == 500);
+    REQUIRE(test.getGenomes().size() == 100);
+    test.evolve();
+    REQUIRE(test.getGenomes().size() == 100);
     for(int i = 0; i < 100; i++)
     {
-        neat.evolve();
+        test.evolve();
     }
-    REQUIRE(neat.getGenomes().size() == 500);
+    REQUIRE(test.getGenomes().size() == 100);
+
+    test.train(100);
+    test.test();
 }

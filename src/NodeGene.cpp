@@ -74,6 +74,11 @@ void NodeGene::addAccumalator(double value)
 
 double NodeGene::activate()
 {
+    if(type == NodeType::OUTPUT)
+    {
+        this->output = accumalator + bias;
+        return this->output;
+    }
     this->output = activationRelu.activate(accumalator + bias);
     return output;
 }

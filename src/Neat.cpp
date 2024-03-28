@@ -19,6 +19,67 @@ void Neat::initialize(int population)
     NodeGene::setNextID(input + output);
 }
 
+void Neat::train(int genCount)
+{
+    for (int i = 0; i < genCount; i++)
+    {
+        this->genCount++;
+        trainGeneration();
+        evolve();
+    }
+}
+
+void Neat::test()
+{
+    testNetwork(bestGenome);
+}
+
+vector<Genome *> Neat::getGenomes() const
+{
+    return allGenomes;
+}
+
+vector<Species *> Neat::getSpecies() const
+{
+    return allSpecies;
+}
+
+int Neat::getPopulation() const
+{
+    return population;
+}
+
+std::ostream &operator<<(std::ostream &os, const Neat &other)
+{
+    os << "Population: " << other.population << '\n';
+    os << "Genomes: " << other.allGenomes.size() << '\n';
+    for (auto species : other.allSpecies)
+    {
+        os << "Species size: ";
+        os << other.allSpecies.size() << '\n';
+    }
+    return os;
+}
+
+void Neat::trainGeneration()
+{
+    double avgFitness = 0;
+    double bestFitness = INT32_MIN;
+    for (auto genome : allGenomes)
+    {
+        genome->setFitness(playGame(genome));
+        avgFitness += genome->getFitness();
+        if (genome->getFitness() > bestFitness)
+        {
+            bestFitness = genome->getFitness();
+            bestGenome = genome;
+        }
+    }
+    std::cout << "Generation: " << genCount
+              << " Average Fitness: " << avgFitness / population
+              << " Best Fitness: " << bestFitness << '\n';
+}
+
 void Neat::evolve()
 {
     speciate();

@@ -37,9 +37,9 @@ void Species::kill(double percentage)
     int numToKill = static_cast<int>(percentage * members.size());
     // Sort members based on fitness
     std::sort(members.begin(), members.end(), [](Genome *a, Genome *b)
-              { return a->getFitness() > b->getFitness(); });
+              { return a->getFitness() < b->getFitness(); });
     // Remove the lowest performing genomes
-    members.erase(members.end() - numToKill, members.end());
+    members.erase(members.begin(), members.begin() + numToKill);
 }
 
 void Species::evaluateScore()
