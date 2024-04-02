@@ -1,7 +1,6 @@
 #include "NodeGene.hpp"
 #include "Util.hpp"
 
-
 NodeGene::NodeGene(int id, NodeType type)
 {
     this->id = id;
@@ -31,6 +30,11 @@ void NodeGene::addToLink(const LinkGene &link)
     toLinks.push_back(&link);
 }
 
+void NodeGene::addFromLink(const LinkGene &link)
+{
+    fromLinks.push_back(&link);
+}
+
 void NodeGene::removeLink(const LinkGene &link)
 {
     for (int i = 0; i < toLinks.size(); i++)
@@ -42,6 +46,19 @@ void NodeGene::removeLink(const LinkGene &link)
         }
     }
 }
+
+void NodeGene::removeFromLink(const LinkGene &link)
+{
+    for (int i = 0; i < fromLinks.size(); i++)
+    {
+        if (fromLinks[i]->getID() == link.getID())
+        {
+            fromLinks.erase(fromLinks.begin() + i);
+            break;
+        }
+    }
+}
+
 int NodeGene::getID() const
 {
     return id;
@@ -67,6 +84,11 @@ vector<const LinkGene *> NodeGene::getToLinks() const
     return toLinks;
 }
 
+vector<const LinkGene *> NodeGene::getFromLinks() const
+{
+    return fromLinks;
+}
+
 void NodeGene::addAccumalator(double value)
 {
     accumalator += value;
@@ -74,7 +96,7 @@ void NodeGene::addAccumalator(double value)
 
 double NodeGene::activate()
 {
-    if(type == NodeType::OUTPUT)
+    if (type == NodeType::OUTPUT)
     {
         this->output = accumalator + bias;
         return this->output;
@@ -90,5 +112,11 @@ void NodeGene::resetAccumalator()
 
 void NodeGene::setNextID(int id)
 {
-    NodeGene::nextID = id;
+    nextID = id;
+}
+
+NodeGene *NodeGene::getNewNode()
+{
+    double bias = randDouble(-1, 1);
+    return new NodeGene(HIDDEN, bias);
 }

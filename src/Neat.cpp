@@ -21,6 +21,7 @@ void Neat::initialize(int population)
 
 void Neat::train(int genCount)
 {
+    bestGenome.setFitness(INT32_MIN);
     for (int i = 0; i < genCount; i++)
     {
         this->genCount++;
@@ -31,7 +32,7 @@ void Neat::train(int genCount)
 
 void Neat::test()
 {
-    testNetwork(bestGenome);
+    testNetwork(&bestGenome);
 }
 
 vector<Genome *> Neat::getGenomes() const
@@ -64,20 +65,18 @@ std::ostream &operator<<(std::ostream &os, const Neat &other)
 void Neat::trainGeneration()
 {
     double avgFitness = 0;
-    double bestFitness = INT32_MIN;
     for (auto genome : allGenomes)
     {
         genome->setFitness(playGame(genome));
         avgFitness += genome->getFitness();
-        if (genome->getFitness() > bestFitness)
+        if (genome->getFitness() > bestGenome.getFitness())
         {
-            bestFitness = genome->getFitness();
-            bestGenome = genome;
+            bestGenome = *genome;
         }
     }
     std::cout << "Generation: " << genCount
               << " Average Fitness: " << avgFitness / population
-              << " Best Fitness: " << bestFitness << '\n';
+              << " Best Fitness: " << bestGenome.getFitness() << '\n';
 }
 
 void Neat::evolve()

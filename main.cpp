@@ -6,8 +6,8 @@
 int main()
 {
     Xor xorGame;
-    xorGame.initialize(100);
-    xorGame.train(150);
+    xorGame.initialize(500);
+    xorGame.train(100);
     xorGame.test();
     return 0;
 }

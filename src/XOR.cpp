@@ -24,23 +24,23 @@ double operator-(const vector<T> &rhs, const vector<T> &lhs)
     double result = 0;
     for (int i = 0; i < lhs.size(); i++)
     {
-        result += std::abs(rhs[i] - lhs[i]);
+        result += std::fabs(rhs[i] - lhs[i]);
     }
-    return result;
+    return std::fabs(result);
 }
 
 double Xor::playGame(Genome *genome)
 {
-    auto v0 = genome->activate({0, 0});
-    auto v1 = genome->activate({1, 0});
-    auto v2 = genome->activate({0, 1});
-    auto v3 = genome->activate({1, 1});
+    auto v0 = genome->activate({0.0, 0.0});
+    auto v1 = genome->activate({1.0, 0.0});
+    auto v2 = genome->activate({0.0, 1.0});
+    auto v3 = genome->activate({1.0, 1.0});
 
     double fitness = 0;
-    vector<double> v0Expected = {0, 1};
-    vector<double> v1Expected = {1, 0};
-    vector<double> v2Expected = {1, 0};
-    vector<double> v3Expected = {0, 1};
+    vector<double> v0Expected = {0.0, 1.0};
+    vector<double> v1Expected = {1.0, 0.0};
+    vector<double> v2Expected = {1.0, 0.0};
+    vector<double> v3Expected = {0.0, 1.0};
 
     fitness += v0 - v0Expected;
     fitness += v1 - v1Expected;

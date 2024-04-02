@@ -24,7 +24,7 @@ protected:
     int output;
     int population;
     int genCount = 0;
-    Genome *bestGenome;
+    Genome bestGenome;
     vector<Genome *> allGenomes;
     vector<Species *> allSpecies;
     vector<NodeGene *> allNodes;
