@@ -9,5 +9,8 @@ int main()
     xorGame.initialize(500);
     xorGame.train(100);
     xorGame.test();
+    while (true)
+    {
+    }   
     return 0;
 }

@@ -1,6 +1,8 @@
 #include "Neat.hpp"
 #include "Util.hpp"
 
+using std::make_unique;
+
 Neat::Neat(int input, int output)
 {
     this->input = input;
@@ -13,7 +15,7 @@ void Neat::initialize(int population)
     this->population = population;
     for (int i = 0; i < population; i++)
     {
-        allGenomes.push_back(new Genome(input, output, true));
+        allGenomes.push_back(make_unique<Genome>(input, output, true));
     }
     LinkGene::setNextID(input * output);
     NodeGene::setNextID(input + output);
@@ -35,12 +37,12 @@ void Neat::test()
     testNetwork(&bestGenome);
 }
 
-vector<Genome *> Neat::getGenomes() const
+const vector<GenomePtr> &Neat::getGenomes() const
 {
     return allGenomes;
 }
 
-vector<Species *> Neat::getSpecies() const
+const vector<SpeciesPtr> &Neat::getSpecies() const
 {
     return allSpecies;
 }
@@ -54,7 +56,7 @@ std::ostream &operator<<(std::ostream &os, const Neat &other)
 {
     os << "Population: " << other.population << '\n';
     os << "Genomes: " << other.allGenomes.size() << '\n';
-    for (auto species : other.allSpecies)
+    for (const auto &species : other.allSpecies)
     {
         os << "Species size: ";
         os << other.allSpecies.size() << '\n';
@@ -65,9 +67,9 @@ std::ostream &operator<<(std::ostream &os, const Neat &other)
 void Neat::trainGeneration()
 {
     double avgFitness = 0;
-    for (auto genome : allGenomes)
+    for (const auto &genome : allGenomes)
     {
-        genome->setFitness(playGame(genome));
+        genome->setFitness(playGame(genome.get()));
         avgFitness += genome->getFitness();
         if (genome->getFitness() > bestGenome.getFitness())
         {
@@ -90,28 +92,28 @@ void Neat::evolve()
 void Neat::speciate()
 {
     allSpecies.clear();
-    for (auto genome : allGenomes)
+    for (const auto &genome : allGenomes)
     {
         bool found = false;
-        for (auto species : allSpecies)
+        for (const auto &species : allSpecies)
         {
             const Genome *leader = species->getLeader();
             if (genome->distance(*leader) <= Config::speciationThreshold)
             {
-                species->addMember(genome);
+                species->addMember(genome.get());
                 found = true;
                 break;
             }
         }
         if (!found)
         {
-            Species *newSpecies = new Species();
-            newSpecies->setLeader(genome);
-            allSpecies.push_back(newSpecies);
+            SpeciesPtr newSpecies = make_unique<Species>();
+            newSpecies->setLeader(genome.get());
+            allSpecies.push_back(std::move(newSpecies));
         }
     }
 
-    for (auto species : allSpecies)
+    for (const auto &species : allSpecies)
     {
         species->evaluateScore();
     }
@@ -121,11 +123,10 @@ void Neat::kill()
 {
     for (auto it = allSpecies.begin(); it != allSpecies.end();)
     {
-        Species *species = *it;
+        Species *species = it->get();
         species->kill(Config::deathRate);
         if (species->getSpeciesSize() < 2)
         {
-            delete species;
             it = allSpecies.erase(it);
         }
         else
@@ -137,43 +138,32 @@ void Neat::kill()
 
 void Neat::breed()
 {
-    vector<Genome *> newGenomes;
+    vector<GenomePtr> newGenomes;
     int size = allSpecies.size();
     int children = population / size;
     int remainder = population - children * size;
 
-    for (auto species : allSpecies)
+    for (const auto &species : allSpecies)
     {
         for (int i = 0; i < children; i++)
         {
-            newGenomes.push_back(species->breed());
+            newGenomes.push_back(GenomePtr(species->breed()));
         }
     }
 
     for (int i = 0; i < remainder; i++)
     {
         int index = randNumber(size);
-        newGenomes.push_back(allSpecies[index]->breed());
+        newGenomes.push_back(GenomePtr(allSpecies[index]->breed()));
     }
-
-    for (auto genome : allGenomes)
-    {
-        delete genome;
-    }
-
-    allGenomes = newGenomes;
-
-    for (auto species : allSpecies)
-    {
-        delete species;
-    }
-
+    allGenomes.clear();
+    this->allGenomes = std::move(newGenomes);
     allSpecies.clear();
 }
 
 void Neat::mutate()
 {
-    for (auto genome : allGenomes)
+    for (const auto &genome : allGenomes)
     {
         genome->mutate();
     }

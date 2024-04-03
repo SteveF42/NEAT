@@ -3,6 +3,12 @@
 #include "Genome.hpp"
 #include "Species.hpp"
 #include <iostream>
+#include <memory>
+
+using std::unique_ptr;
+
+typedef unique_ptr<Genome> GenomePtr;
+typedef unique_ptr<Species> SpeciesPtr;
 
 class Neat
 {
@@ -14,8 +20,8 @@ public:
     void clear();
     void test();
 
-    vector<Genome *> getGenomes() const;
-    vector<Species *> getSpecies() const;
+    const vector<GenomePtr> &getGenomes() const;
+    const vector<SpeciesPtr> &getSpecies() const;
     int getPopulation() const;
     friend std::ostream &operator<<(std::ostream &os, const Neat &other);
 
@@ -25,9 +31,8 @@ protected:
     int population;
     int genCount = 0;
     Genome bestGenome;
-    vector<Genome *> allGenomes;
-    vector<Species *> allSpecies;
-    vector<NodeGene *> allNodes;
+    vector<GenomePtr> allGenomes;
+    vector<SpeciesPtr> allSpecies;
     // inherited class will implement playGame
     virtual double playGame(Genome *genome) = 0;
     virtual void testNetwork(Genome *genome) = 0;

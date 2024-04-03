@@ -6,6 +6,8 @@
 #include <iterator>
 #include <unordered_map>
 
+using std::make_shared;
+
 Genome::Genome(int inputs, int outputs, bool initInputs)
 {
     this->inputs = inputs;
@@ -19,19 +21,26 @@ Genome::Genome(int inputs, int outputs, bool initInputs)
     // initialize inputs and outputs
 }
 
+Genome::~Genome()
+{
+    allNodes.clear();
+    allLinks.clear();
+    layers.clear();
+}
+
 void Genome::initialize()
 {
     networkLayer inputLayer(INPUT);
     networkLayer outputLayer(OUTPUT);
     for (int i = 0; i < inputs; i++)
     {
-        allNodes.insert({i, new NodeGene(i, INPUT)});
-        inputLayer.addNode(allNodes[i]);
+        allNodes.insert({i, make_shared<NodeGene>((int)i, INPUT)});
+        inputLayer.addNode(allNodes[i].get());
     }
     for (int i = 0; i < outputs; i++)
     {
-        allNodes.insert({i + inputs, new NodeGene(i + inputs, OUTPUT)});
-        outputLayer.addNode(allNodes[i + inputs]);
+        allNodes.insert({i + inputs, make_shared<NodeGene>((int)i + inputs, OUTPUT)});
+        outputLayer.addNode(allNodes[i + inputs].get());
     }
     layers.insert({OUTPUT_LAYER, outputLayer});
     layers.insert({INPUT_LAYER, inputLayer});
@@ -42,9 +51,8 @@ void Genome::initialize()
     {
         for (int j = 0; j < outputs; j++)
         {
-            LinkGene *newLink = new LinkGene(allNodes[j + inputs], allNodes[i], randDouble(-1, 1), idx++);
+            LinkPtr newLink = make_shared<LinkGene>(allNodes[j + inputs].get(), allNodes[i].get(), randDouble(-1, 1), idx++);
             allNodes[i]->addToLink(*newLink);
-            allNodes[j + inputs]->addFromLink(*newLink);
             allLinks.insert({newLink->getID(), newLink});
         }
     }
@@ -82,8 +90,8 @@ double Genome::distance(const Genome &other)
         auto e2 = other.allLinks.end();
         while (p1 != this->allLinks.end() && p2 != other.allLinks.end())
         {
-            LinkGene *conn1 = p1->second;
-            LinkGene *conn2 = p2->second;
+            LinkGene *conn1 = p1->second.get();
+            LinkGene *conn2 = p2->second.get();
 
             if (conn1->getID() == conn2->getID())
             {
@@ -134,10 +142,10 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
     for (const auto &[nodeID, dominantNeuron] : dominant.allNodes)
     {
         NodeGene *recessiveNeuron = recessive.findNode(nodeID);
-        NodeGene *newNode;
+        NodePtr newNode;
         if (recessiveNeuron == nullptr)
         {
-            newNode = new NodeGene(*dominantNeuron);
+            newNode = make_shared<NodeGene>(*dominantNeuron);
         }
         else
         {
@@ -145,7 +153,7 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
         }
 
         child->allNodes.insert({nodeID, newNode});
-        nodeMap.insert({newNode->getID(), newNode});
+        nodeMap.insert({newNode->getID(), newNode.get()});
     }
     child->buildLayers();
 
@@ -160,9 +168,8 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
             NodeGene *fromNode = nodeMap[id1];
             NodeGene *toNode = nodeMap[id2];
 
-            LinkGene *newLink = new LinkGene(toNode, fromNode, dominantLink->getWeight(), linkID);
+            LinkPtr newLink = make_shared<LinkGene>(toNode, fromNode, dominantLink->getWeight(), linkID);
             fromNode->addToLink(*newLink);
-            toNode->addFromLink(*newLink);
             child->allLinks.insert({linkID, newLink});
         }
         else
@@ -172,10 +179,9 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
 
             double weight = randNumber(2) == 0 ? dominantLink->getWeight() : recessiveLink->getWeight();
             bool enabled = randNumber(2) == 0 ? dominantLink->isEnabled() : recessiveLink->isEnabled();
-            LinkGene *newLink = new LinkGene(toNode, fromNode, weight, linkID);
+            LinkPtr newLink = make_shared<LinkGene>(toNode, fromNode, weight, linkID);
             newLink->setEnabled(enabled);
             fromNode->addToLink(*newLink);
-            toNode->addFromLink(*newLink);
             child->allLinks.insert({linkID, newLink});
         }
     }
@@ -235,12 +241,12 @@ vector<double> Genome::activate(vector<double> inputs)
     return genomeOutputs;
 }
 
-map<int, LinkGene *> Genome::getLinks()
+map<int, LinkPtr> Genome::getLinks()
 {
     return allLinks;
 }
 
-map<int, NodeGene *> Genome::getNodes()
+map<int, NodePtr> Genome::getNodes()
 {
     return allNodes;
 }
@@ -288,10 +294,10 @@ void Genome::addNode()
     // disable the link
     link->setEnabled(false);
     // create a new node
-    NodeGene *newNode = NodeGene::getNewNode();
+    NodePtr newNode = NodeGene::getNewNode();
     // create two new links
-    LinkGene *toNewNode = new LinkGene(newNode, link->getFromNode(), link->getWeight());
-    LinkGene *fromNewNode = new LinkGene(link->getToNode(), newNode, 1);
+    LinkPtr toNewNode = make_shared<LinkGene>(newNode.get(), link->getFromNode(), link->getWeight());
+    LinkPtr fromNewNode = make_shared<LinkGene>(link->getToNode(), newNode.get(), 1);
     // insert new links
     allLinks.insert({toNewNode->getID(), toNewNode});
     allLinks.insert({fromNewNode->getID(), fromNewNode});
@@ -299,13 +305,11 @@ void Genome::addNode()
     allNodes.insert({newNode->getID(), newNode});
     // add links to nodes
     newNode->addToLink(*fromNewNode);
-    newNode->addFromLink(*toNewNode);
 
     NodeGene *originalFrom = link->getFromNode();
     originalFrom->addToLink(*toNewNode);
 
     NodeGene *originalTo = link->getToNode();
-    originalTo->addFromLink(*fromNewNode);
 
     // fix all nodes to ensure they are on the correct layer
     buildLayers();
@@ -321,18 +325,15 @@ void Genome::removeNode()
     // remove all links to and from the node
     for (auto it = allLinks.begin(); it != allLinks.end();)
     {
-        LinkGene *link = it->second;
+        LinkGene *link = it->second.get();
         if (link->getFromNode() == nodeToDelete)
         {
             it = allLinks.erase(it);
-            link->getToNode()->removeFromLink(*link);
-            delete link;
         }
         else if (link->getToNode() == nodeToDelete)
         {
             it = allLinks.erase(it);
             link->getFromNode()->removeLink(*link);
-            delete link;
         }
         else
         {
@@ -342,7 +343,6 @@ void Genome::removeNode()
     // remove the node
     allNodes.erase(nodeToDelete->getID());
     removeNodeFromLayer(nodeToDelete);
-    delete nodeToDelete;
 }
 
 void Genome::addLink()
@@ -361,15 +361,14 @@ void Genome::addLink()
     }
 
     // only allow feed forward network
-    if (containsCycle(fromNode->getID()) || onSameLayer(fromNode, toNode))
+    if (containsCycle(toNode, fromNode->getID()) || onSameLayer(fromNode, toNode))
     {
         return;
     }
 
     // create the link
-    LinkGene *newLink = new LinkGene(toNode, fromNode, randDouble(Config::min, Config::max));
+    LinkPtr newLink = make_shared<LinkGene>(toNode, fromNode, randDouble(Config::min, Config::max));
     fromNode->addToLink(*newLink);
-    toNode->addFromLink(*newLink);
     allLinks.insert({newLink->getID(), newLink});
     buildLayers();
 }
@@ -384,7 +383,7 @@ void Genome::removeLink()
     int linkIndex = randNumber(allLinks.size());
     auto it = allLinks.begin();
     std::advance(it, linkIndex);
-    LinkGene *link = it->second;
+    LinkGene *link = it->second.get();
 
     // prevents input and output links from being removed
     if (link->getFromNode()->getType() == INPUT && link->getToNode()->getType() == OUTPUT)
@@ -392,10 +391,8 @@ void Genome::removeLink()
         return;
     }
     link->getFromNode()->removeLink(*link);
-    link->getToNode()->removeFromLink(*link);
     allLinks.erase(link->getID());
     buildLayers();
-    delete link;
 }
 
 void Genome::weightShift()
@@ -428,12 +425,12 @@ void Genome::shiftBias()
     node->setBias(adjustBias);
 }
 
-NodeGene *Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
+NodePtr Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
 {
     int id = lhs.getID();
     double bias = randNumber(1) == 0 ? lhs.getBias() : rhs.getBias();
 
-    auto newNode = new NodeGene(id, lhs.getType(), bias);
+    NodePtr newNode =make_shared<NodeGene>(id, lhs.getType(), bias);
     return newNode;
 }
 
@@ -447,11 +444,11 @@ LinkGene *Genome::crossLinks(const LinkGene &lhs, const LinkGene &rhs)
     return child;
 }
 
-bool Genome::containsCycle(int fromNode)
+bool Genome::containsCycle(NodeGene *toNode, int fromNode)
 {
     std::stack<NodeGene *> dfs;
     std::unordered_set<NodeGene *> visited;
-    dfs.push(allNodes[fromNode]);
+    dfs.push(toNode);
 
     while (dfs.size() > 0)
     {
@@ -497,14 +494,14 @@ LinkGene *Genome::getRandomLink()
     int rand = randNumber(allLinks.size());
     auto it = allLinks.begin();
     std::advance(it, rand);
-    return it->second;
+    return it->second.get();
 }
 
 NodeGene *Genome::findNode(int nodeID) const
 {
     if (allNodes.find(nodeID) != allNodes.end())
     {
-        return allNodes.at(nodeID);
+        return allNodes.at(nodeID).get();
     }
     return nullptr;
 }
@@ -515,7 +512,7 @@ LinkGene *Genome::findLink(int linkID) const
     {
         if (link->getID() == linkID)
         {
-            return link;
+            return link.get();
         }
     }
     return nullptr;
@@ -580,35 +577,6 @@ void Genome::removeNodeFromLayer(NodeGene *node)
     }
 }
 
-int Genome::findNodeLayer(int nodeID)
-{
-    std::queue<NodeGene *> q;
-    std::unordered_set<NodeGene *> visited;
-
-    q.push(allNodes[nodeID]);
-    int maxDepth = 0;
-    int depth = 0;
-    while (!q.empty())
-    {
-        int size = q.size();
-        for (int i = 0; i < size; i++)
-        {
-            NodeGene *current = q.front();
-            q.pop();
-            if (visited.find(current) != visited.end())
-                continue;
-            visited.insert(current);
-            for (const LinkGene *link : current->getFromLinks())
-            {
-                q.push(link->getFromNode());
-            }
-        }
-        maxDepth = std::max(maxDepth, depth);
-        depth++;
-    }
-    return maxDepth;
-}
-
 bool Genome::onSameLayer(NodeGene *lhs, NodeGene *rhs)
 {
     for (const auto &[key, layer] : layers)
@@ -623,7 +591,7 @@ bool Genome::onSameLayer(NodeGene *lhs, NodeGene *rhs)
 
 void Genome::addNodeToLayer(NodeGene *node)
 {
-    int layer = findNodeLayer(node->getID());
+    int layer = node->layer;
     if (layers.find(layer) == layers.end())
     {
         networkLayer newLayer(HIDDEN);
@@ -636,20 +604,58 @@ void Genome::addNodeToLayer(NodeGene *node)
     }
 }
 
+void Genome::searchLayers(NodeGene *inputNode)
+{
+    unordered_set<NodeGene *> visited;
+    std::queue<NodeGene *> q;
+    int depth = 0;
+    q.push(inputNode);
+    while (!q.empty())
+    {
+        int size = q.size();
+        for (int i = 0; i < size; i++)
+        {
+            NodeGene *current = q.front();
+            q.pop();
+            if (visited.find(current) != visited.end())
+                continue;
+
+            current->layer = std::max(current->layer, depth);
+            for (const LinkGene *link : current->getToLinks())
+            {
+                q.push(link->getToNode());
+            }
+        }
+        depth++;
+    }
+}
+
 void Genome::buildLayers()
 {
+    // n = # of nodes
+    // m = # of links
     this->layers.clear();
     networkLayer inputLayer(INPUT);
     networkLayer outputLayer(OUTPUT);
+    std::vector<NodeGene *> hiddenNodes;
+
     for (const auto &[key, node] : allNodes)
     {
         if (node->getType() == INPUT)
-            inputLayer.addNode(node);
+            inputLayer.addNode(node.get());
         else if (node->getType() == OUTPUT)
-            outputLayer.addNode(node);
+            outputLayer.addNode(node.get());
         else
-            addNodeToLayer(node);
+            hiddenNodes.push_back(node.get());
     }
     layers.insert({INPUT_LAYER, inputLayer});
     layers.insert({OUTPUT_LAYER, outputLayer});
+    for (const auto &node : inputLayer.nodes)
+    {
+        searchLayers(node);
+    }
+    for (const auto &node : hiddenNodes)
+    {
+        addNodeToLayer(node);
+    }
 }

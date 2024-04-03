@@ -4,11 +4,15 @@
 #include <vector>
 #include <map>
 #include <unordered_set>
+#include <memory>
 #include "NodeGene.hpp"
 #include "LinkGene.hpp"
 using std::map;
 using std::unordered_set;
 using std::vector;
+
+typedef std::shared_ptr<NodeGene> NodePtr;
+typedef std::shared_ptr<LinkGene> LinkPtr;
 
 struct networkLayer
 {
@@ -26,6 +30,7 @@ class Genome
 public:
     Genome(int inputs, int outputs, bool initInputs = true);
     Genome() {}
+    ~Genome();
     void initialize();
     double getFitness();
     void setFitness(double fitness);
@@ -34,8 +39,8 @@ public:
     static Genome *crossGenomes(const Genome &dominant, const Genome &recessive);
 
     vector<double> activate(vector<double> inputs);
-    map<int, LinkGene *> getLinks();
-    map<int, NodeGene *> getNodes();
+    map<int, LinkPtr> getLinks();
+    map<int, NodePtr> getNodes();
 
     // mutations
     void addNode();
@@ -58,20 +63,20 @@ private:
     int inputs;
     int outputs;
     // first n + m nodes are inputs and outputs
-    map<int, NodeGene *> allNodes;
-    map<int, LinkGene *> allLinks;
+    map<int, NodePtr> allNodes;
+    map<int, LinkPtr> allLinks;
     map<int, networkLayer> layers;
 
-    static NodeGene *crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
+    static NodePtr crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
     static LinkGene *crossLinks(const LinkGene &lhs, const LinkGene &rhs);
 
     // util
-    bool containsCycle(int fromNode);
+    bool containsCycle(NodeGene *toNode, int fromNode);
     void removeNodeFromLayer(NodeGene *node);
     void buildLayers();
     bool onSameLayer(NodeGene *lhs, NodeGene *rhs);
     void addNodeToLayer(NodeGene *node);
-    int findNodeLayer(int nodeID);
+    void searchLayers(NodeGene *inputNode);
     NodeGene *getRandomNode(bool includeOuputs = false, bool includeInputs = false);
     LinkGene *getRandomLink();
     NodeGene *findNode(int nodeID) const;

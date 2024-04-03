@@ -30,11 +30,6 @@ void NodeGene::addToLink(const LinkGene &link)
     toLinks.push_back(&link);
 }
 
-void NodeGene::addFromLink(const LinkGene &link)
-{
-    fromLinks.push_back(&link);
-}
-
 void NodeGene::removeLink(const LinkGene &link)
 {
     for (int i = 0; i < toLinks.size(); i++)
@@ -43,18 +38,6 @@ void NodeGene::removeLink(const LinkGene &link)
         {
             toLinks.erase(toLinks.begin() + i);
             return;
-        }
-    }
-}
-
-void NodeGene::removeFromLink(const LinkGene &link)
-{
-    for (int i = 0; i < fromLinks.size(); i++)
-    {
-        if (fromLinks[i]->getID() == link.getID())
-        {
-            fromLinks.erase(fromLinks.begin() + i);
-            break;
         }
     }
 }
@@ -84,11 +67,6 @@ vector<const LinkGene *> NodeGene::getToLinks() const
     return toLinks;
 }
 
-vector<const LinkGene *> NodeGene::getFromLinks() const
-{
-    return fromLinks;
-}
-
 void NodeGene::addAccumalator(double value)
 {
     accumalator += value;
@@ -115,8 +93,8 @@ void NodeGene::setNextID(int id)
     nextID = id;
 }
 
-NodeGene *NodeGene::getNewNode()
+NodePtr NodeGene::getNewNode()
 {
     double bias = randDouble(-1, 1);
-    return new NodeGene(HIDDEN, bias);
+    return std::make_shared<NodeGene>(HIDDEN, bias);
 }

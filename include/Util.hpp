@@ -21,7 +21,7 @@ struct Config
     inline const static double mutateWeightShiftProbability = 0.80;
     inline const static double mutateWeightRandomProbability = 0.40;
     inline const static double mutateEnableLinkProbability = 0.01;
-    inline const static double speciationThreshold = 1.4;
+    inline const static double speciationThreshold = 1.55;
     inline const static double mutateBiasShiftProbability = 0.50;
     inline const static double complexityPenalty = 2;
 };
