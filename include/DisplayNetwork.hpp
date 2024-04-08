@@ -20,12 +20,11 @@ private:
     int TARGET_HEIGHT = 800;
     void draw();
     void update();
-    void run();
 
 public:
     DisplayNetwork(Neat &neatEngine);
     DisplayNetwork(Neat &neatEngine, int width, int height);
-    thread displayThread();
+    void run();
 };
 
 #endif

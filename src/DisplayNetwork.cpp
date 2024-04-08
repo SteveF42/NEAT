@@ -25,30 +25,22 @@ void DisplayNetwork::draw()
 
 void DisplayNetwork::update()
 {
-    this->draw();
+    
 }
 
 void DisplayNetwork::run()
 {
 
-    thread eventThread = thread(
-        [this]()
-        {
-            sf::Event event;
-            while (this->window->pollEvent(event))
-            {
-                if (event.type == sf::Event::Closed)
-                    this->window->close();
-            }
-        });
+    sf::Event event;
     while (this->window->isOpen())
     {
+        //event 
+        while (this->window->pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+                this->window->close();
+        }
+        this->update();
         this->draw();
     }
-}
-
-thread DisplayNetwork::displayThread()
-{
-    window->setActive(false);
-    return thread(&DisplayNetwork::run, this);
 }
