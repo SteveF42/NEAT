@@ -41,6 +41,7 @@ public:
     vector<double> activate(vector<double> inputs);
     map<int, LinkPtr> getLinks();
     map<int, NodePtr> getNodes();
+    map<int, networkLayer> getLayers();
 
     // mutations
     void addNode();
@@ -56,9 +57,9 @@ public:
     bool operator>(const Genome &other);
     Genome operator=(const Genome &other);
 
+    inline static const int INPUT_LAYER = -2;
+    inline static const int OUTPUT_LAYER = -1;
 private:
-    const int INPUT_LAYER = -2;
-    const int OUTPUT_LAYER = -1;
     double fitness;
     int inputs;
     int outputs;

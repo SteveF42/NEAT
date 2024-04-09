@@ -6,8 +6,8 @@
 #include <thread>
 #include "Neat.hpp"
 
-using std::unique_ptr;
 using std::thread;
+using std::unique_ptr;
 typedef unique_ptr<sf::RenderWindow> WindowPtr;
 
 class DisplayNetwork
@@ -19,7 +19,8 @@ private:
     int TARGET_WIDTH = 800;
     int TARGET_HEIGHT = 800;
     void draw();
-    void update();
+    void update() const;
+    void drawLayer(networkLayer &layer, int layerIdx, int offsetX) const;
 
 public:
     DisplayNetwork(Neat &neatEngine);

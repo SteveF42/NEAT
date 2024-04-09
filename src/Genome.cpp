@@ -251,6 +251,11 @@ map<int, NodePtr> Genome::getNodes()
     return allNodes;
 }
 
+map<int, networkLayer> Genome::getLayers()
+{
+    return layers;
+}
+
 void Genome::mutate()
 {
     if (randDouble(0, 1) < Config::mutateNodeProbability)
