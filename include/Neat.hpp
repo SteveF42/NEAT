@@ -22,6 +22,7 @@ public:
 
     const vector<GenomePtr> &getGenomes() const;
     const vector<SpeciesPtr> &getSpecies() const;
+    Genome &getBestGenome();
     int getPopulation() const;
     friend std::ostream &operator<<(std::ostream &os, const Neat &other);
 

@@ -47,6 +47,11 @@ const vector<SpeciesPtr> &Neat::getSpecies() const
     return allSpecies;
 }
 
+Genome &Neat::getBestGenome()
+{
+    return bestGenome;
+}
+
 int Neat::getPopulation() const
 {
     return population;

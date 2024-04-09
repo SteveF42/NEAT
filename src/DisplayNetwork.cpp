@@ -25,7 +25,7 @@ void DisplayNetwork::draw()
 
 void DisplayNetwork::update()
 {
-    
+    Genome &bestGenome = this->neatEngine->getBestGenome();
 }
 
 void DisplayNetwork::run()
