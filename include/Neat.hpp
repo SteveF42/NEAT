@@ -3,9 +3,14 @@
 #include "Genome.hpp"
 #include "Species.hpp"
 #include <iostream>
+#include <atomic>
 #include <memory>
+#include <shared_mutex>
+#include <mutex>
 
 using std::unique_ptr;
+using std::atomic;
+using std::shared_mutex;
 
 typedef unique_ptr<Genome> GenomePtr;
 typedef unique_ptr<Species> SpeciesPtr;
@@ -40,6 +45,7 @@ protected:
     void trainGeneration();
 
 private:
+    shared_mutex mutex_;
     void speciate();
     void kill();
     void breed();

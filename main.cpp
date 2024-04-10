@@ -4,6 +4,7 @@
 #include "XOR.hpp"
 #include "DisplayNetwork.hpp"
 #include <thread>
+#include <atomic>
 
 int main()
 {
