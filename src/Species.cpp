@@ -58,11 +58,10 @@ Genome *Species::breed()
     Genome *g1 = members[randNumber(size)];
     Genome *g2 = members[randNumber(size)];
 
-    if (*g1 > *g2)
+    if (g1->getFitness() > g2->getFitness())
         return Genome::crossGenomes(*g1,*g2);
     else
         return Genome::crossGenomes(*g2,*g1);
-
 }
 
 void Species::clear()

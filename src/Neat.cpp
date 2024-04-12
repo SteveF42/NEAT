@@ -86,7 +86,8 @@ void Neat::trainGeneration()
     }
     std::cout << "Generation: " << genCount
               << " Average Fitness: " << avgFitness / population
-              << " Best Fitness: " << bestGenome.getFitness() << '\n';
+              << " Best Fitness: " << bestGenome.getFitness() 
+              << " Species Count: " << allSpecies.size() << '\n';
 }
 
 void Neat::evolve()
@@ -166,7 +167,6 @@ void Neat::breed()
     }
     allGenomes.clear();
     this->allGenomes = std::move(newGenomes);
-    allSpecies.clear();
 }
 
 void Neat::mutate()

@@ -49,8 +49,8 @@ void DisplayNetwork::drawLayer(networkLayer &layer, int layerIdx, int layerCount
 
 void DisplayNetwork::drawLinks()
 {
-    Genome &bestGenome = this->neatEngine->getBestGenome();
-    map<int, LinkPtr> links = bestGenome.getLinks();
+    Genome bestGenome = this->neatEngine->getBestGenome();
+    map<int, LinkPtr> &links = bestGenome.getLinks();
     for (auto &[id, link] : links)
     {
         NodeGene *inNode = link->getFromNode();
@@ -60,12 +60,12 @@ void DisplayNetwork::drawLinks()
             sf::Vertex(sf::Vector2f(nodePositions[outNode->getID()].x, nodePositions[outNode->getID()].y))};
         if (link->isEnabled() == true)
         {
-            line[0].color = sf::Color::Green;
-            line[1].color = sf::Color::Green;
+            line[0].color = sf::Color::Blue;
+            line[1].color = sf::Color::Cyan;
         }
         else
         {
-            line[0].color = sf::Color::Red;
+            line[0].color = sf::Color::Magenta;
             line[1].color = sf::Color::Red;
             line->color = sf::Color::Red;
         }

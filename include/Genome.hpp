@@ -39,7 +39,7 @@ public:
     static Genome *crossGenomes(const Genome &dominant, const Genome &recessive);
 
     vector<double> activate(vector<double> inputs);
-    map<int, LinkPtr> getLinks();
+    map<int, LinkPtr>& getLinks();
     map<int, NodePtr> getNodes();
     map<int, networkLayer> getLayers();
 
@@ -52,9 +52,8 @@ public:
     void toggleWeight();
     void weightShift();
     void shiftBias();
+    void buildLayers();
 
-    bool operator<(const Genome &other);
-    bool operator>(const Genome &other);
     Genome operator=(const Genome &other);
 
     inline static const int INPUT_LAYER = -2;
@@ -73,8 +72,9 @@ private:
 
     // util
     bool containsCycle(NodeGene *toNode, int fromNode);
+    bool hasOutGoingConnections(NodeGene *node);
+    bool hasInComingConnections(NodeGene *node);
     void removeNodeFromLayer(NodeGene *node);
-    void buildLayers();
     bool onSameLayer(NodeGene *lhs, NodeGene *rhs);
     void addNodeToLayer(NodeGene *node);
     void searchLayers(NodeGene *inputNode);
