@@ -29,6 +29,7 @@ class Genome
 {
 public:
     Genome(int inputs, int outputs, bool initInputs = true);
+    Genome(const Genome &other);
     Genome() {}
     ~Genome();
     void initialize();
@@ -40,7 +41,7 @@ public:
 
     vector<double> activate(vector<double> inputs);
     map<int, LinkPtr>& getLinks();
-    map<int, NodePtr> getNodes();
+    map<int, NodePtr>& getNodes();
     map<int, networkLayer> getLayers();
 
     // mutations
@@ -67,13 +68,11 @@ private:
     map<int, LinkPtr> allLinks;
     map<int, networkLayer> layers;
 
-    static NodePtr crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
+    static NodeGene* crossNeurons(const NodeGene &lhs, const NodeGene &rhs);
     static LinkGene *crossLinks(const LinkGene &lhs, const LinkGene &rhs);
 
     // util
     bool containsCycle(NodeGene *toNode, int fromNode);
-    bool hasOutGoingConnections(NodeGene *node);
-    bool hasInComingConnections(NodeGene *node);
     void removeNodeFromLayer(NodeGene *node);
     bool onSameLayer(NodeGene *lhs, NodeGene *rhs);
     void addNodeToLayer(NodeGene *node);

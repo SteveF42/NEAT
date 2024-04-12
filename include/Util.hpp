@@ -9,8 +9,8 @@ double randDouble(double x1, double x2);
 
 struct Config
 {
-    inline const static double min = -20;
-    inline const static double max = 20;
+    inline const static double min = -10;
+    inline const static double max = 10;
     inline const static double deathRate = 0.5;
     inline const static double excessCoefficient = 0.20;
     inline const static double disjointCoefficient = 0.20;

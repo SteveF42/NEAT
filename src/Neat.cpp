@@ -47,7 +47,7 @@ const vector<SpeciesPtr> &Neat::getSpecies() const
     return allSpecies;
 }
 
-Genome &Neat::getBestGenome()
+Genome Neat::getBestGenome()
 {
     std::shared_lock lock(mutex_);
     return bestGenome;
@@ -82,7 +82,6 @@ void Neat::trainGeneration()
         {
             bestGenome = *genome;
         }
-        lock.unlock();
     }
     std::cout << "Generation: " << genCount
               << " Average Fitness: " << avgFitness / population

@@ -49,7 +49,7 @@ void DisplayNetwork::drawLayer(networkLayer &layer, int layerIdx, int layerCount
 
 void DisplayNetwork::drawLinks()
 {
-    Genome bestGenome = this->neatEngine->getBestGenome();
+    Genome bestGenome = Genome(this->neatEngine->getBestGenome());
     map<int, LinkPtr> &links = bestGenome.getLinks();
     for (auto &[id, link] : links)
     {
@@ -77,7 +77,7 @@ void DisplayNetwork::drawLinks()
 void DisplayNetwork::update()
 {
     nodePositions.clear();
-    Genome &bestGenome = this->neatEngine->getBestGenome();
+    Genome bestGenome = Genome(this->neatEngine->getBestGenome());
     map<int, networkLayer> layers = bestGenome.getLayers();
     // draw nodes and links
     int layerCount = layers.size();

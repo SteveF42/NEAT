@@ -21,6 +21,16 @@ Genome::Genome(int inputs, int outputs, bool initInputs)
     // initialize inputs and outputs
 }
 
+Genome::Genome(const Genome &other)
+{
+    this->inputs = other.inputs;
+    this->outputs = other.outputs;
+    this->fitness = other.fitness;
+    this->allNodes = other.allNodes;
+    this->allLinks = other.allLinks;
+    this->layers = other.layers;
+}
+
 Genome::~Genome()
 {
     allNodes.clear();
@@ -150,7 +160,8 @@ Genome *Genome::crossGenomes(const Genome &dominant, const Genome &recessive)
         }
         else
         {
-            newNode = crossNeurons(*dominantNeuron, *recessiveNeuron);
+            NodeGene* t = crossNeurons(*dominantNeuron, *recessiveNeuron);
+            newNode = NodePtr(t);
         }
 
         child->allNodes.insert({nodeID, newNode});
@@ -242,12 +253,12 @@ vector<double> Genome::activate(vector<double> inputs)
     return genomeOutputs;
 }
 
-map<int, LinkPtr>& Genome::getLinks()
+map<int, LinkPtr> &Genome::getLinks()
 {
     return allLinks;
 }
 
-map<int, NodePtr> Genome::getNodes()
+map<int, NodePtr> &Genome::getNodes()
 {
     return allNodes;
 }
@@ -347,8 +358,8 @@ void Genome::removeNode()
         }
     }
     // remove the node
-    allNodes.erase(nodeToDelete->getID());
     removeNodeFromLayer(nodeToDelete);
+    allNodes.erase(nodeToDelete->getID());
 }
 
 void Genome::addLink()
@@ -402,6 +413,8 @@ void Genome::removeLink()
 
 void Genome::weightShift()
 {
+    if (allLinks.size() == 0)
+        return;
     LinkGene *link = getRandomLink();
     double adjustWeight = randDouble(-1, 1) + link->getWeight();
     adjustWeight = std::min(adjustWeight, Config::max);
@@ -411,12 +424,16 @@ void Genome::weightShift()
 
 void Genome::toggleWeight()
 {
+    if (allLinks.size() == 0)
+        return;
     LinkGene *link = getRandomLink();
     link->setEnabled(!link->isEnabled());
 }
 
 void Genome::weightRandom()
 {
+    if (allLinks.size() == 0)
+        return;
     LinkGene *link = getRandomLink();
     link->setWeight(randDouble(-1, 1));
 }
@@ -430,12 +447,12 @@ void Genome::shiftBias()
     node->setBias(adjustBias);
 }
 
-NodePtr Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
+NodeGene* Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
 {
     int id = lhs.getID();
     double bias = randNumber(1) == 0 ? lhs.getBias() : rhs.getBias();
 
-    NodePtr newNode = make_shared<NodeGene>(id, lhs.getType(), bias);
+    NodeGene* newNode = new NodeGene(id, lhs.getType(), bias);
     return newNode;
 }
 
@@ -513,12 +530,9 @@ NodeGene *Genome::findNode(int nodeID) const
 
 LinkGene *Genome::findLink(int linkID) const
 {
-    for (const auto &[key, link] : allLinks)
+    if(allLinks.find(linkID) != allLinks.end())
     {
-        if (link->getID() == linkID)
-        {
-            return link.get();
-        }
+        return allLinks.at(linkID).get();
     }
     return nullptr;
 }
@@ -537,14 +551,14 @@ Genome Genome::operator=(const Genome &other)
 void Genome::activationSoftmax(vector<double> &v)
 {
     double sum = 0;
-    double max = 0;
+    double max = INT16_MIN;
     for (auto &val : v)
     {
         max = std::max(max, val);
     }
     for (auto &val : v)
     {
-        val = std::exp2(val - max);
+        val = std::exp(val - max);
         sum += val;
     }
     for (auto &val : v)
