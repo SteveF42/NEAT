@@ -25,6 +25,7 @@ struct Config
     inline const static double mutateEnableLinkProbability = 0.10;
     inline const static double speciationThreshold = 1.39;
     inline const static double mutateBiasShiftProbability = 0.50;
+    inline const static double initialConnectionProbability = 0.7;
     inline const static double complexityPenalty = 2;
     inline const static double mutationRate = 0.80;
 };
