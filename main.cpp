@@ -15,7 +15,7 @@ int main()
         display.run();
     });
     xorGame.initialize(1000);
-    xorGame.train(100);
+    xorGame.train(1000);
     xorGame.test();
     displayThread.join();
 

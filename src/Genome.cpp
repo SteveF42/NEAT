@@ -452,7 +452,7 @@ void Genome::shiftBias()
 NodeGene* Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
 {
     int id = lhs.getID();
-    double bias = randNumber(1) == 0 ? lhs.getBias() : rhs.getBias();
+    double bias = randNumber(2) == 0 ? lhs.getBias() : rhs.getBias();
 
     NodeGene* newNode = new NodeGene(id, lhs.getType(), bias);
     return newNode;
@@ -461,8 +461,8 @@ NodeGene* Genome::crossNeurons(const NodeGene &lhs, const NodeGene &rhs)
 // CHANGE ALL NODES VECTOR TO AN UNORDERED MAP FOR FASTER ACCESS TIMES AND EASIER NODE DELETION
 LinkGene *Genome::crossLinks(const LinkGene &lhs, const LinkGene &rhs)
 {
-    double weight = randNumber(1) == 0 ? lhs.getWeight() : rhs.getWeight();
-    bool enabled = randNumber(1) == 0 ? lhs.isEnabled() : rhs.isEnabled();
+    double weight = randNumber(2) == 0 ? lhs.getWeight() : rhs.getWeight();
+    bool enabled = randNumber(2) == 0 ? lhs.isEnabled() : rhs.isEnabled();
     auto child = new LinkGene(lhs.getFromNode(), lhs.getToNode(), weight, lhs.getID());
     child->setEnabled(enabled);
     return child;

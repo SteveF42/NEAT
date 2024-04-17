@@ -16,6 +16,11 @@ int Species::getSpeciesSize()
     return members.size();
 }
 
+vector<Genome *> Species::getMembers() const
+{
+    return members;
+}
+
 void Species::setLeader(Genome *leader)
 {
     members.push_back(leader);

@@ -4,7 +4,7 @@ main:
 	g++ -c main.cpp -I./include -I"C:\msys64\mingw64\SFML-2.5.1-windows-gcc-7.3.0-mingw-64-bit\SFML-2.5.1\include" -DSFML_STATIC -g
 	
 test:
-	g++ -c ./tests/*.cpp -I ./include -g
+	g++ -c ./tests/*.cpp -I ./include -I"C:\msys64\mingw64\SFML-2.5.1-windows-gcc-7.3.0-mingw-64-bit\SFML-2.5.1\include" -g
 	g++ *.o -o test
 	./test
 

@@ -121,7 +121,7 @@ TEST_CASE("Neat Framework")
     REQUIRE(test.getGenomes().size() == 100);
     test.evolve();
     REQUIRE(test.getGenomes().size() == 100);
-    for(int i = 0; i < 100; i++)
+    for (int i = 0; i < 100; i++)
     {
         test.evolve();
     }
@@ -129,4 +129,18 @@ TEST_CASE("Neat Framework")
 
     test.train(100);
     test.test();
+}
+
+TEST_CASE("random numbers")
+{
+    double rand = randDouble(0, 1);
+    REQUIRE((rand >= 0 && rand <= 1));
+    rand = randDouble(-1, 1);
+    REQUIRE((rand >= -1 && rand <= 1));
+    int randInt = randNumber(10);
+    REQUIRE((randInt >= 0 && randInt <= 10));
+    REQUIRE((randDouble(0, 1) <= 1));
+
+    std::cout << randDouble(0, 1) << std::endl;
+    std::cout << randNumber(2) << std::endl;
 }
