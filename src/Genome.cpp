@@ -311,6 +311,8 @@ void Genome::mutate()
 
 void Genome::addNode()
 {
+    if(allLinks.size() == 0)
+        return;
     // get a random link
     LinkGene *link = getRandomLink();
     // disable the link
