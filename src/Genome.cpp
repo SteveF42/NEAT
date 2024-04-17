@@ -402,11 +402,11 @@ void Genome::removeLink()
     LinkGene *link = it->second.get();
 
     // prevents input and output links from being removed
-    if (link->getFromNode()->getType() == INPUT && link->getToNode()->getType() == OUTPUT)
-    {
-        link->setEnabled(false);
-        return;
-    }
+    // if (link->getFromNode()->getType() == INPUT && link->getToNode()->getType() == OUTPUT)
+    // {
+    //     link->setEnabled(false);
+    //     return;
+    // }
     link->getFromNode()->removeLink(*link);
     allLinks.erase(link->getID());
 }
