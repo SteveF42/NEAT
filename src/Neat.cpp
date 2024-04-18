@@ -184,7 +184,8 @@ void Neat::mutate()
     {
         if (randDouble(0, 1) <= Config::mutationRate)
         {
-            genome->mutate();
+            if (randDouble(0, 1) < Config::mutationRate)
+                genome->mutate();
         }
     }
 }

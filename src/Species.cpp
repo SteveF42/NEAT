@@ -60,7 +60,7 @@ void Species::evaluateScore()
 Genome *Species::breed()
 {
     int size = members.size();
-    Genome *g1 = members[size - 1];
+    Genome *g1 = members[randNumber(size)];
     Genome *g2 = members[randNumber(size)];
 
     if (g1->getFitness() > g2->getFitness())
