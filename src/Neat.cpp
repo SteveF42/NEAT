@@ -72,7 +72,7 @@ std::ostream &operator<<(std::ostream &os, const Neat &other)
 
 void Neat::trainGeneration()
 {
-    double avgFitness = 0;
+    avgFitness = 0;
     for (const auto &genome : allGenomes)
     {
         genome->setFitness(playGame(genome.get()));
@@ -83,8 +83,10 @@ void Neat::trainGeneration()
             bestGenome = *genome;
         }
     }
+    avgFitness /= population;
     std::cout << "Generation: " << genCount
-              << " Average Fitness: " << avgFitness / population
+              << " Population: " << allGenomes.size()
+              << " Average Fitness: " << avgFitness
               << " Best Fitness: " << bestGenome.getFitness()
               << " Species Count: " << allSpecies.size() << '\n';
 }
@@ -124,6 +126,7 @@ void Neat::speciate()
     for (const auto &species : allSpecies)
     {
         species->evaluateScore();
+        species->setNumOfChildren(species->getScore() / avgFitness * species->getSpeciesSize());
     }
 }
 
@@ -165,15 +168,21 @@ void Neat::breed()
 
     for (const auto &species : allSpecies)
     {
-        for (int i = 0; i < children; i++)
+        for (int i = species->getSpeciesSize(); i < species->getNumOfChildren(); i++)
         {
             GenomePtr child = GenomePtr(species->breed());
             child->child = true;
             newGenomes.push_back(std::move(child));
         }
+        // for (int i = 0; i < children; i++)
+        // {
+        //     GenomePtr child = GenomePtr(species->breed());
+        //     child->child = true;
+        //     newGenomes.push_back(std::move(child));
+        // }
     }
 
-    for (int i = 0; i < remainder; i++)
+    for (int i = newGenomes.size(); i < population; i++)
     {
         int index = randNumber(size);
         GenomePtr child = GenomePtr(allSpecies[index]->breed());

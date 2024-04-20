@@ -14,7 +14,7 @@ int main()
         DisplayNetwork display(xorGame);
         display.run();
     });
-    xorGame.initialize(1000);
+        xorGame.initialize(100);
     xorGame.train(1000);
     xorGame.test();
     displayThread.join();
