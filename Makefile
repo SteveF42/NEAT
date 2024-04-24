@@ -9,6 +9,7 @@ test:
 	./test
 
 test_link:
+	rm DisplayNetwork.o
 	g++ *.o -o test
 	./test
 

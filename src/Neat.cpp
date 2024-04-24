@@ -17,6 +17,7 @@ void Neat::initialize(int population)
     {
         allGenomes.push_back(make_unique<Genome>(input, output, true));
     }
+    Config::initialize();
     LinkGene::setNextID(input * output);
     NodeGene::setNextID(input + output);
 }
