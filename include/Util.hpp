@@ -29,7 +29,7 @@ public:
     inline static double speciationThreshold = 1.4;
     inline static double mutateBiasShiftProbability = 0.8;
     inline static double initialLinkProbability = 1;
-    inline static double complexityPenalty = 2;
+    inline static double complexityPenalty = 0.0001;
     inline static double mutationRate = 1;
     inline static double topPerformerPercentage = 0.2;
 private:

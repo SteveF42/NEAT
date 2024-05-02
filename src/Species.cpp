@@ -6,6 +6,12 @@ Genome *Species::getLeader() const
 {
     return leader;
 }
+
+Genome *Species::getMember(int idx)
+{
+    return members[idx];
+}
+
 double Species::getScore()
 {
     return score;
@@ -44,7 +50,7 @@ void Species::kill(double percentage)
     std::sort(members.begin(), members.end(), [](Genome *a, Genome *b)
               { return a->getFitness() > b->getFitness(); });
     // Remove the lowest performing genomes
-    members.erase(members.begin() + numToKill, members.end());
+    members.erase(members.begin() + numToKill, members.end());    
 }
 
 void Species::evaluateScore()
@@ -52,7 +58,19 @@ void Species::evaluateScore()
     double total = 0;
     for (Genome *g : members)
     {
-        total += g->getFitness();
+        double rawFitness = g->getFitness();
+        double sharedFitness = rawFitness / members.size();
+
+        // Calculate the complexity penalty
+        double complexityPenalty = Config::complexityPenalty * g->getComplexity();
+
+        // Subtract the complexity penalty from the shared fitness
+        double penalizedFitness = sharedFitness - complexityPenalty;
+
+        total += penalizedFitness;
+
+        // Set the penalized fitness
+        g->setAdjustedFitness(penalizedFitness);
     }
     score = total / members.size();
 }
@@ -60,7 +78,7 @@ void Species::evaluateScore()
 Genome *Species::breed()
 {
     int size = members.size();
-    int numTopPerformers = static_cast<int>(members.size() * Config::topPerformerPercentage);
+    int numTopPerformers = members.size();
     Genome *g1 = members[randNumber(numTopPerformers)];
     Genome *g2 = members[randNumber(numTopPerformers)];
 

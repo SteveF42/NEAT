@@ -8,10 +8,11 @@
 
 using std::make_shared;
 
-Genome::Genome(int inputs, int outputs, bool initInputs)
+Genome::Genome(int inputs, int outputs, bool initInputs, int hidden)
 {
     this->inputs = inputs;
     this->outputs = outputs;
+    this->hidden = hidden;
     this->fitness = 0;
 
     if (initInputs)
@@ -52,6 +53,10 @@ void Genome::initialize()
         allNodes.insert({i + inputs, make_shared<NodeGene>((int)i + inputs, OUTPUT)});
         outputLayer.addNode(allNodes[i + inputs].get());
     }
+    for (int i = 0; i < hidden; i++)
+    {
+        allNodes.insert({i + inputs + outputs, make_shared<NodeGene>((int)i + inputs + outputs, HIDDEN)});
+    }
     layers.insert({OUTPUT_LAYER, outputLayer});
     layers.insert({INPUT_LAYER, inputLayer});
 
@@ -81,6 +86,21 @@ double Genome::getFitness()
 void Genome::setFitness(double fitness)
 {
     this->fitness = fitness;
+}
+
+void Genome::setAdjustedFitness(double adjustedFitness)
+{
+    this->adjustedFitness = adjustedFitness;
+}
+
+double Genome::getAdjustedFitness()
+{
+    return adjustedFitness;
+}
+
+double Genome::getComplexity()
+{
+    return allLinks.size() + allNodes.size();
 }
 
 double Genome::distance(const Genome &other)
