@@ -48,7 +48,7 @@ void Species::kill(double percentage)
     int numToKill = static_cast<int>(percentage * members.size());
     // Sort members based on fitness
     std::sort(members.begin(), members.end(), [](Genome *a, Genome *b)
-              { return a->getFitness() > b->getFitness(); });
+              { return a->getAdjustedFitness() > b->getAdjustedFitness(); });
     // Remove the lowest performing genomes
     members.erase(members.begin() + numToKill, members.end());    
 }
@@ -82,7 +82,7 @@ Genome *Species::breed()
     Genome *g1 = members[randNumber(numTopPerformers)];
     Genome *g2 = members[randNumber(numTopPerformers)];
 
-    if (g1->getFitness() > g2->getFitness())
+    if (g1->getAdjustedFitness() > g2->getAdjustedFitness())
         return Genome::crossGenomes(*g1, *g2);
     else
         return Genome::crossGenomes(*g2, *g1);

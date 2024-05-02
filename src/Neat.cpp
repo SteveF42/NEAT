@@ -125,16 +125,13 @@ void Neat::speciate()
         }
     }
 
+    double adjAverage = 0;
     for (const auto &species : allSpecies)
     {
         species->evaluateScore();
+        adjAverage += species->getScore();
     }
-    double adjAverage = 0;
-    for (const auto &g : allGenomes)
-    {
-        adjAverage += g->getAdjustedFitness();
-    }
-    adjAverage /= population;
+    adjAverage /= allSpecies.size();
     for (const auto &species : allSpecies)
     {
         species->setNumOfChildren((species->getScore() / adjAverage) * species->getSpeciesSize());

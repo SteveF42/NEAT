@@ -100,7 +100,7 @@ double Genome::getAdjustedFitness()
 
 double Genome::getComplexity()
 {
-    return allLinks.size() + allNodes.size();
+    return allNodes.size();
 }
 
 double Genome::distance(const Genome &other)
