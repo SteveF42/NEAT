@@ -59,18 +59,18 @@ void Species::evaluateScore()
     for (Genome *g : members)
     {
         double rawFitness = g->getFitness();
-        double sharedFitness = rawFitness / members.size();
 
         // Calculate the complexity penalty
         double complexityPenalty = Config::complexityPenalty * g->getComplexity();
-
         // Subtract the complexity penalty from the shared fitness
-        double penalizedFitness = sharedFitness - complexityPenalty;
+        double penalizedFitness = rawFitness - complexityPenalty;
 
-        total += penalizedFitness;
+        double adjustedFitness = penalizedFitness / members.size();
+
+        total += adjustedFitness;
 
         // Set the penalized fitness
-        g->setAdjustedFitness(penalizedFitness);
+        g->setAdjustedFitness(adjustedFitness);
     }
     score = total / members.size();
 }

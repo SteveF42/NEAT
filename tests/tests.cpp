@@ -121,7 +121,8 @@ TEST_CASE("Neat Framework")
     REQUIRE(test.getGenomes().size() == 100);
     test.evolve();
     REQUIRE(test.getGenomes().size() == 100);
-    for (int i = 0; i < 100; i++)
+    test.train(1);
+    for (int i = 0; i < 5; i++)
     {
         test.evolve();
     }

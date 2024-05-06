@@ -26,6 +26,7 @@ Genome::Genome(const Genome &other)
 {
     this->inputs = other.inputs;
     this->outputs = other.outputs;
+    this->hidden = other.hidden;
     this->fitness = other.fitness;
     this->allNodes = other.allNodes;
     this->allLinks = other.allLinks;
@@ -59,6 +60,8 @@ void Genome::initialize()
     }
     layers.insert({OUTPUT_LAYER, outputLayer});
     layers.insert({INPUT_LAYER, inputLayer});
+
+    vector<int> layerOrder = {INPUT_LAYER, OUTPUT_LAYER};
 
     // initialize links
     int idx = -1;
@@ -100,7 +103,7 @@ double Genome::getAdjustedFitness()
 
 double Genome::getComplexity()
 {
-    return allNodes.size();
+    return allLinks.size();
 }
 
 double Genome::distance(const Genome &other)
