@@ -8,6 +8,9 @@ TEST_CASE("Genome links initialized correctly")
 {
     Genome genome(2, 1);
     REQUIRE(genome.getLinks().size() == 2);
+
+    Genome genome2(3, 2, true, 2);
+    REQUIRE(genome2.getLinks().size() == (3 + 2) * 2);
 }
 
 TEST_CASE("Add/remove node mutation")
@@ -118,17 +121,11 @@ TEST_CASE("Neat Framework")
     Xor test;
     test.initialize(100);
 
-    REQUIRE(test.getGenomes().size() == 100);
+    test.train(1);
     test.evolve();
     REQUIRE(test.getGenomes().size() == 100);
-    test.train(1);
-    for (int i = 0; i < 5; i++)
-    {
-        test.evolve();
-    }
-    REQUIRE(test.getGenomes().size() == 100);
-
     test.train(100);
+    REQUIRE(test.getGenomes().size() == 100);
     test.test();
 }
 

@@ -15,8 +15,8 @@ void Neat::initialize(int population)
 {
     this->population = population;
     Config::initialize();
-    LinkGene::setNextID(input * output);
-    NodeGene::setNextID(input + output);
+    LinkGene::setNextID(hidden > 0 ? hidden * (input + output) : input * output);
+    NodeGene::setNextID(hidden > 0 ? input + output + hidden : input + output);
     for (int i = 0; i < population; i++)
     {
         allGenomes.push_back(make_unique<Genome>(input, output, true));
@@ -103,7 +103,7 @@ void Neat::evolve()
 
 void Neat::speciate()
 {
-    allSpecies.clear(); 
+    allSpecies.clear();
     for (const auto &genome : allGenomes)
     {
         bool found = false;
