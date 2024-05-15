@@ -29,11 +29,12 @@ double randDouble(double x1, double x2)
 void Config::initialize()
 {
     std::filesystem::path path = std::filesystem::current_path() / "config.txt";
-    ifstream file("C:\\Users\\steve\\Documents\\Visual Studio Projects\\CPP\\NEAT\\config.txt");
+    ifstream file(path.string());
     if (!file.is_open())
     {
         std::cerr << "Error opening config file\n";
-        exit(1);
+        std::cout << "Using default values\n";
+        return;
     }
 
     string line;

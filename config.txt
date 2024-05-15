@@ -15,6 +15,6 @@ mutateEnableLinkProbability = 0.13
 speciationThreshold = 1.9
 mutateBiasShiftProbability = 0.7
 initialLinkProbability = 1
-complexityPenalty = 0.0000
+complexityPenalty = 0.0001
 mutationRate = 1
 topPerformerPercentage = 0.20

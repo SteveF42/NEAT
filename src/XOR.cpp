@@ -1,7 +1,7 @@
 #include "XOR.hpp"
 #include "math.h"
 
-Xor::Xor() : Neat(2, 2)
+Xor::Xor() : Neat(2, 2, 5)
 {
 }
 

@@ -19,7 +19,7 @@ void Neat::initialize(int population)
     NodeGene::setNextID(hidden > 0 ? input + output + hidden : input + output);
     for (int i = 0; i < population; i++)
     {
-        allGenomes.push_back(make_unique<Genome>(input, output, true));
+        allGenomes.push_back(make_unique<Genome>(input, output, true, hidden));
     }
 }
 
