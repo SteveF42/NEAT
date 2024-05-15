@@ -3,10 +3,17 @@
 
 using std::make_unique;
 
+DisplayNetwork::~DisplayNetwork()
+{
+    if (this->windowThread->joinable())
+    {
+        windowThread->join();
+    }
+}
+
 DisplayNetwork::DisplayNetwork(Neat &neatEngine)
 {
     this->neatEngine = &neatEngine;
-    this->window = make_unique<sf::RenderWindow>(sf::VideoMode(TARGET_WIDTH, TARGET_HEIGHT), "Neat");
 }
 
 DisplayNetwork::DisplayNetwork(Neat &neatEngine, int width, int height)
@@ -14,7 +21,6 @@ DisplayNetwork::DisplayNetwork(Neat &neatEngine, int width, int height)
     this->neatEngine = &neatEngine;
     this->TARGET_HEIGHT = height;
     this->TARGET_WIDTH = width;
-    this->window = make_unique<sf::RenderWindow>(sf::VideoMode(TARGET_WIDTH, TARGET_HEIGHT), "Neat");
 }
 
 void DisplayNetwork::draw()
@@ -96,16 +102,50 @@ void DisplayNetwork::update()
 
 void DisplayNetwork::run()
 {
+    sf::Context context;
+    this->window = make_unique<sf::RenderWindow>(sf::VideoMode(TARGET_WIDTH, TARGET_HEIGHT), "Neat Display");
+    context.setActive(true);
 
     sf::Event event;
-    while (this->window->isOpen())
+
+    while (this->window->isOpen() && this->running == true)
     {
+        this->draw();
         // event
         while (this->window->pollEvent(event))
         {
             if (event.type == sf::Event::Closed)
+            {
                 this->window->close();
+                this->running = false;
+            }
         }
-        this->draw();
+    }
+}
+
+void DisplayNetwork::createWindowThread()
+{
+    if (this->windowThread)
+    {
+        std::cout << "Window thread already exists\n";
+        return;
+    }
+
+    this->running = true;
+    this->windowThread = make_unique<thread>([this]()
+                                             { this->run(); });
+}
+
+void DisplayNetwork::killWindowThread()
+{
+    if (this->windowThread)
+    {
+        mtx.lock();
+        this->running = false;
+        if (this->window)
+        {
+            this->window->close();
+        }
+        mtx.unlock();
     }
 }

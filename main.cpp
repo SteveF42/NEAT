@@ -9,16 +9,12 @@
 int main()
 {
     Xor xorGame;
-    thread displayThread = thread([&xorGame]()
-    {
-        DisplayNetwork display(xorGame);
-        display.run();
-    });
+    DisplayNetwork displayThread(xorGame);
+    displayThread.createWindowThread();
     
     xorGame.initialize(1000);
-    xorGame.train(5000);
+    xorGame.train(100);
     xorGame.test();
-    displayThread.join();
 
     return 0;
 }
