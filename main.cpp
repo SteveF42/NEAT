@@ -12,7 +12,7 @@ int main()
     DisplayNetwork displayThread(xorGame);
     displayThread.createWindowThread();
     
-    xorGame.initialize(1000);
+    xorGame.initialize(5000);
     xorGame.train(100);
     xorGame.test();
 
